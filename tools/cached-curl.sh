@@ -25,9 +25,17 @@
 #   ~/.cache/aso/<sha1>.meta     HTTP code + Content-Type on one line
 #
 # Environment variables:
-#   ASO_CACHE_DIR   override cache dir (default: ~/.cache/aso)
-#   ASO_CACHE_OFF   set to 1 to bypass cache (fetch + write only)
-#   ASO_CACHE_DRY   set to 1 to read cache but never fetch (returns empty on miss)
+#   ASO_CACHE_DIR              override cache dir (default: ~/.cache/aso)
+#   ASO_CACHE_OFF              set to 1 to bypass cache (fetch + write only)
+#   ASO_CACHE_DRY              set to 1 to read cache but never fetch
+#   ASO_CACHE_EMPTY_TTL        if set, bodies smaller than EMPTY_THRESHOLD
+#                              use this TTL instead of the main TTL — useful
+#                              for reports that return empty until settled
+#                              (e.g. ASC Finance reports: TTL=30d normally,
+#                              EMPTY_TTL=24h so we re-fetch an unpopulated
+#                              month the next day)
+#   ASO_CACHE_EMPTY_THRESHOLD  byte threshold below which a body is "empty"
+#                              (default: 128)
 
 set -euo pipefail
 
@@ -51,11 +59,21 @@ META_FILE="$CACHE_DIR/$KEY.meta"
 
 now=$(date +%s)
 
-# Cache hit: fresh body file exists, age < TTL, not bypassed.
+# Cache hit: fresh body file exists, age < effective TTL, not bypassed.
+# Effective TTL shortens to ASO_CACHE_EMPTY_TTL when the cached body is tiny
+# (treated as "no data yet" — e.g. an ASC Finance report for a month that has
+# not settled yet). This lets callers keep a long base TTL for stable data
+# while still re-fetching empty responses daily.
 if [[ "${ASO_CACHE_OFF:-0}" != "1" && -f "$BODY_FILE" ]]; then
   mtime=$(stat -f %m "$BODY_FILE" 2>/dev/null || stat -c %Y "$BODY_FILE")
+  size=$(stat -f %z "$BODY_FILE" 2>/dev/null || stat -c %s "$BODY_FILE")
   age=$(( now - mtime ))
-  if (( age < TTL )); then
+  effective_ttl="$TTL"
+  empty_threshold="${ASO_CACHE_EMPTY_THRESHOLD:-128}"
+  if [[ -n "${ASO_CACHE_EMPTY_TTL:-}" ]] && (( size < empty_threshold )); then
+    effective_ttl="$ASO_CACHE_EMPTY_TTL"
+  fi
+  if (( age < effective_ttl )); then
     cat "$BODY_FILE"
     exit 0
   fi

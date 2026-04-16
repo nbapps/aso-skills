@@ -166,6 +166,12 @@ curl -H "Authorization: Bearer $JWT" https://api.appstoreconnect.apple.com/v1/ap
 tools/cached-curl.sh 43200 \
   "https://api.appstoreconnect.apple.com/v1/salesReports?filter[frequency]=DAILY&filter[reportType]=SALES&filter[reportSubType]=SUMMARY&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-04-15" \
   -H "Authorization: Bearer $JWT" -H "Accept: application/a-gzip"
+
+# Finance reports: 30d cache for settled months, 24h cache when empty
+# (Apple takes ~5 weeks to generate the financial report after month-end)
+ASO_CACHE_EMPTY_TTL=86400 tools/cached-curl.sh 2592000 \
+  "https://api.appstoreconnect.apple.com/v1/financeReports?filter[regionCode]=Z1&filter[reportType]=FINANCIAL&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-03" \
+  -H "Authorization: Bearer $JWT"
 ```
 
 See [tools/REGISTRY.md](../REGISTRY.md#helpers) for the full TTL table per source.

@@ -56,7 +56,7 @@ Two shell scripts in `tools/` reduce boilerplate and keep rate-limit pressure do
 | `apps.apple.com` scrape (reviews) | **21600** (6h) | Recent reviews stream in — 6h keeps signal warm |
 | ASC `/v1/apps` | **86400** (1d) | App list rarely changes |
 | ASC `/v1/salesReports` daily | **43200** (12h) | Daily reports settle within hours but don't change once stable |
-| ASC `/v1/financeReports` monthly | **2592000** (30d) | Monthly reports are final after ~5 weeks |
+| ASC `/v1/financeReports` monthly | **2592000** (30d) main + **86400** (1d) empty | Monthly reports are final after ~5 weeks, but earlier months return empty until Apple settles them — set `ASO_CACHE_EMPTY_TTL=86400` so empty responses retry the next day |
 | ASC `/v1/apps/{id}/customerReviews` | **3600** (1h) | Balance freshness with review traffic |
 | Astro MCP | **not cached via this helper** — the MCP has its own data freshness and local DB |
 
@@ -67,6 +67,15 @@ JWT=$(tools/asc-jwt.sh)
 tools/cached-curl.sh 43200 \
   "https://api.appstoreconnect.apple.com/v1/salesReports?filter[frequency]=DAILY&filter[reportType]=SALES&filter[reportSubType]=SUMMARY&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-04-15" \
   -H "Authorization: Bearer $JWT" -H "Accept: application/a-gzip"
+```
+
+Short-TTL fallback for reports that come back empty until settled (e.g. Finance reports):
+
+```bash
+# 30d TTL for populated reports, 24h TTL for empty ones
+ASO_CACHE_EMPTY_TTL=86400 tools/cached-curl.sh 2592000 \
+  "https://api.appstoreconnect.apple.com/v1/financeReports?filter[regionCode]=Z1&filter[reportType]=FINANCIAL&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-03" \
+  -H "Authorization: Bearer $JWT"
 ```
 
 ## Not Currently Covered
