@@ -1,7 +1,7 @@
 # ASO & App Marketing Skills
 
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b5872442-99f9-4e66-8667-96eb03e55f98" />
+<img width="1536" height="1024" alt="image" src="hero.png" />
 <div align="center">
 <p align="center">
   <a href="https://www.linkedin.com/in/erencanarica/">
@@ -12,21 +12,59 @@
 
 AI agent skills for App Store Optimization (ASO) and mobile app marketing. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any [Agent Skills](https://agentskills.io)-compatible AI assistant to help with keyword research, metadata optimization, competitor analysis, and app growth.
 
-Powered by real App Store data via a small, composable stack: the **Astro MCP** (keywords, rankings, ratings), **Sensor Tower public** endpoint (metadata, screenshots, downloads/revenue estimates), **iTunes Lookup** (release notes), and **Apple's RSS review feed** (user reviews).
+Powered by real App Store data via a small, composable stack: the **[Astro](https://tryastro.app?aff=z0Jlp)** MCP (keywords, rankings, ratings), **Sensor Tower**'s public endpoint (metadata, screenshots, downloads / revenue estimates), **iTunes Lookup** (release notes), and a **web scrape of `apps.apple.com`** for user reviews.
 
 ## Why This Exists
 
 Most ASO knowledge lives in blog posts, courses, and expensive consultants. We packaged it into skills that any AI agent can use — so you get expert-level ASO guidance directly in your IDE.
 
-Each skill contains battle-tested frameworks, scoring rubrics, and output templates. The agent reads the skill, pulls real data from the App Store (via the Astro MCP, Sensor Tower's public endpoint, iTunes Lookup, and Apple's RSS reviews) and gives you actionable recommendations — not generic advice.
+Each skill contains battle-tested frameworks, scoring rubrics, and output templates. The agent reads the skill, pulls real data from the App Store (via the Astro MCP, Sensor Tower's public endpoint, iTunes Lookup, and a scrape of `apps.apple.com`) and gives you actionable recommendations — not generic advice.
 
 ## Quick Start
 
-**Cursor** — Settings (Cmd+Shift+J) → Rules → Add Rule → Remote Rule (Github) → paste `https://github.com/eronred/aso-skills`
+### 1. Install Astro
 
-**Claude Code** — `npx skills add eronred/aso-skills`
+[**Download Astro**](https://tryastro.app?aff=z0Jlp) — macOS app that tracks your App Store keywords, rankings, and ratings, and exposes an MCP server for AI agents to consume that data.
 
-**Manual** — `git clone https://github.com/eronred/aso-skills.git && cp -r aso-skills/skills/* .cursor/skills/`
+Once installed, open Astro → **Settings** → enable the **MCP server**. It listens locally on `http://127.0.0.1:8089/mcp` (no auth, localhost-only).
+
+### 2. Wire the MCP server into your agent
+
+**Claude Code:**
+```bash
+claude mcp add --transport http astro http://127.0.0.1:8089/mcp
+```
+
+**Cursor** — edit `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "astro": {
+      "url": "http://127.0.0.1:8089/mcp"
+    }
+  }
+}
+```
+
+**VS Code** — edit `~/.vscode/mcp.json` or `.vscode/mcp.json`:
+```json
+{
+  "servers": {
+    "astro": {
+      "type": "http",
+      "url": "http://127.0.0.1:8089/mcp"
+    }
+  }
+}
+```
+
+### 3. Install the skills
+
+**Cursor** — Settings (Cmd+Shift+J) → Rules → Add Rule → Remote Rule (Github) → paste `https://github.com/nbapps/aso-skills`
+
+**Claude Code** — `npx skills add nbapps/aso-skills`
+
+**Manual** — `git clone https://github.com/nbapps/aso-skills.git && cp -r aso-skills/skills/* .cursor/skills/`
 
 Then ask your agent:
 
@@ -34,21 +72,17 @@ Then ask your agent:
 "Run an ASO audit for my app (id: 1617391485)"
 "Find the best keywords for a meditation app"
 "Optimize my App Store title and subtitle"
-"How many downloads do I need to reach top 10 in Health & Fitness?"
-"What apps are rising in the charts right now?"
-"Give me a market briefing for the Games category"
-"How are my downloads and revenue trending this month?"
+"Set up a weekly competitor monitoring routine for apps X, Y, Z"
+"My app rating dropped — how do I recover it?"
+"Build an Apple Search Ads campaign structure for my fitness app"
 "Help me plan a Christmas In-App Event"
 "What seasonal keywords should I add in December?"
 "Optimize my Google Play listing"
-"My app rating dropped — how do I recover it?"
-"Set up a weekly competitor monitoring routine for apps X, Y, Z"
 "Help me pitch TechCrunch for my app launch"
-"Build an Apple Search Ads campaign structure for my fitness app"
 "My app has a crash affecting 2% of sessions — help me triage it"
 ```
 
-Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`, `/market-movers`, `/market-pulse`, `/asc-metrics`, `/in-app-events`, `/seasonal-aso`, `/android-aso`, `/apple-search-ads`, `/competitor-tracking`
+Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`, `/asc-metrics`, `/in-app-events`, `/seasonal-aso`, `/android-aso`, `/apple-search-ads`, `/competitor-tracking`
 
 ## Skills
 
@@ -103,13 +137,15 @@ Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`,
 | [`asc-metrics`](skills/asc-metrics) | Analyze your exact App Store Connect data (downloads, revenue, subscriptions, countries) via the official ASC API |
 | [`crash-analytics`](skills/crash-analytics) | Crashlytics setup, crash triage framework (P0–P3), symbolication, phased release strategy, rating recovery |
 
-### Market Intelligence
+### Market Intelligence *(degraded)*
+
+These skills still load and run, but have no live data source in the current stack — they degrade to general-knowledge output. See [tools/REGISTRY.md](tools/REGISTRY.md).
 
 | Skill | What it does |
 |-------|-------------|
-| [`market-movers`](skills/market-movers) | Identifies top chart gainers/losers, new entries, and dropped apps — explains what's driving changes |
-| [`market-pulse`](skills/market-pulse) | Full market briefing: chart movements + trending keywords + featured apps + new launches in one view |
-| [`competitor-tracking`](skills/competitor-tracking) | Weekly competitor surveillance — metadata changes, keyword shifts, rating trends, chart movement deltas |
+| [`market-movers`](skills/market-movers) | Top chart gainers/losers, new entries, and dropped apps |
+| [`market-pulse`](skills/market-pulse) | Full market briefing: chart movements + trending keywords + featured apps + new launches |
+| [`competitor-tracking`](skills/competitor-tracking) | Weekly competitor surveillance — metadata changes, keyword shifts, rating trends (live, non-degraded) |
 
 ### Foundation
 
@@ -125,20 +161,20 @@ You: "Run an ASO audit for Headspace"
 Agent:
   1. Reads aso-audit/SKILL.md (framework, scoring rubric, output template)
   2. Pulls metadata from Sensor Tower, release notes from iTunes Lookup,
-     keywords + ratings from Astro MCP, reviews from Apple's RSS feed
+     keywords + ratings from the Astro MCP, reviews from the apps.apple.com scrape
   3. Scores each factor (title: 8/10, subtitle: 6/10, keywords: 4/10...)
   4. Returns: ASO Score Card + Quick Wins + High-Impact Changes + Strategic Recs
 ```
 
 Skills reference each other — `aso-audit` might suggest running `keyword-research` for deeper analysis, which then feeds into `metadata-optimization` for implementation.
 
-## Installation
+## Installation Reference
 
 ### Cursor
 
 | Method | Command |
 |--------|---------|
-| GitHub Import | Settings → Rules → Add Rule → Remote Rule → `https://github.com/eronred/aso-skills` |
+| GitHub Import | Settings → Rules → Add Rule → Remote Rule → `https://github.com/nbapps/aso-skills` |
 | Project-level | `cp -r aso-skills/skills/* .cursor/skills/` |
 | Global | `cp -r aso-skills/skills/* ~/.cursor/skills/` |
 
@@ -146,14 +182,14 @@ Skills reference each other — `aso-audit` might suggest running `keyword-resea
 
 | Method | Command |
 |--------|---------|
-| CLI | `npx skills add eronred/aso-skills` |
-| Specific skills | `npx skills add eronred/aso-skills --skill aso-audit keyword-research` |
+| CLI | `npx skills add nbapps/aso-skills` |
+| Specific skills | `npx skills add nbapps/aso-skills --skill aso-audit keyword-research` |
 | Manual | `cp -r aso-skills/skills/* .claude/skills/` |
 
 ### Any Agent
 
 ```bash
-git submodule add https://github.com/eronred/aso-skills.git .agents/aso-skills
+git submodule add https://github.com/nbapps/aso-skills.git .agents/aso-skills
 ```
 
 Works with any tool that supports the [Agent Skills](https://agentskills.io) standard (`.agents/skills/`, `.cursor/skills/`, `.claude/skills/`, `.codex/skills/`).
@@ -164,23 +200,10 @@ Skills work standalone with general ASO knowledge. For real-time data they compo
 
 | Source | Role | Auth |
 |--------|------|------|
-| **[Astro MCP](tools/integrations/astro.md)** | Keyword tracking, rankings (+ history), ratings, search, AI suggestions, competitor keyword extraction | Bearer token (MCP) |
-| **[Sensor Tower public](tools/integrations/sensor-tower.md)** | App metadata, screenshots, monthly downloads & revenue estimates | None |
-| **[iTunes Lookup](tools/integrations/itunes-lookup.md)** | Release notes / What's New, per-country metadata | None |
-| **[App Store reviews (web scrape)](tools/integrations/apple-reviews-scrape.md)** | ~40 SSR-rendered reviews per country per request (the public RSS feed is effectively deprecated) | None |
-
-Astro MCP config:
-
-```json
-{
-  "mcpServers": {
-    "astro": {
-      "url": "https://mcp.astroaso.com/mcp",
-      "headers": { "Authorization": "Bearer your_astro_token" }
-    }
-  }
-}
-```
+| **[Astro MCP](tools/integrations/astro.md)** | Keyword tracking, rankings (+ history + volatility + trend), ratings (+ history), App Store search, AI keyword suggestions, competitor keyword extraction | None (localhost-only) |
+| **[Sensor Tower public](tools/integrations/sensor-tower.md)** | App metadata (title, subtitle, description, promo text, categories, languages), screenshots, icon, monthly downloads & revenue estimates | None |
+| **[iTunes Lookup](tools/integrations/itunes-lookup.md)** | Release notes / What's New, per-country metadata, supported languages, file size, minimum OS | None |
+| **[App Store reviews scrape](tools/integrations/apple-reviews-scrape.md)** | ~40 SSR-rendered reviews per country per request (Apple's public RSS feed is effectively deprecated) | None |
 
 ### First-Party ASC Data — `asc-metrics`
 

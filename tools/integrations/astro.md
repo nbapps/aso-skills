@@ -1,21 +1,61 @@
 # Astro — Keyword Tracking & Rankings
 
-Real-time App Store keyword rankings, suggestions, and competitor keyword extraction via MCP.
+Real-time App Store keyword rankings, suggestions, and competitor keyword extraction via an MCP server exposed by the [Astro macOS app](https://tryastro.app?aff=z0Jlp).
 
-**Website:** [astroaso.com](https://astroaso.com)
+**Website:** [tryastro.app](https://tryastro.app?aff=z0Jlp)
+**Docs:** [tryastro.app/docs/mcp](https://tryastro.app/docs/mcp)
 
-## MCP Setup
+## Setup
 
-Add to your Claude Code or Cursor MCP config:
+1. [Download Astro](https://tryastro.app?aff=z0Jlp) and install it on macOS
+2. Open Astro → **Settings** → enable the **MCP server**
+3. The server listens locally on `http://127.0.0.1:8089/mcp` (no auth, localhost-only — `127.0.0.1` / `::1`)
+
+### Claude Code
+
+```bash
+claude mcp add --transport http astro http://127.0.0.1:8089/mcp
+```
+
+Or edit `~/.claude/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "astro": {
-      "url": "https://mcp.astroaso.com/mcp",
-      "headers": {
-        "Authorization": "Bearer your_astro_token"
+      "transport": {
+        "type": "http",
+        "url": "http://127.0.0.1:8089/mcp"
       }
+    }
+  }
+}
+```
+
+### Cursor
+
+Edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "astro": {
+      "url": "http://127.0.0.1:8089/mcp"
+    }
+  }
+}
+```
+
+### VS Code
+
+Edit `~/.vscode/mcp.json` or `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "astro": {
+      "type": "http",
+      "url": "http://127.0.0.1:8089/mcp"
     }
   }
 }
