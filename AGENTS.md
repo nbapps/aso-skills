@@ -7,7 +7,7 @@ This repo contains ASO & App Marketing skills following the [Agent Skills](https
 ```
 skills/<name>/SKILL.md     — Skill instructions (required, <500 lines)
 skills/<name>/references/  — Detailed docs loaded on demand (optional)
-tools/integrations/        — API integration guides (Astro, Sensor Tower, iTunes Lookup, Apple RSS, Firebase, ASC, etc.)
+tools/integrations/        — API integration guides (Astro, Sensor Tower, iTunes Lookup, App Store review scrape, Firebase, ASC, etc.)
 tools/REGISTRY.md          — Capability matrix: which skill uses which tool
 ```
 

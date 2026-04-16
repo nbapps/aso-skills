@@ -163,6 +163,6 @@ GET /v1/financeReports
 | Keyword volume/difficulty | ✗ | ✓ | ✗ |
 | A/B test setup | ✓ (native) | ✗ | ✗ |
 | Review management (respond) | ✓ | ✗ | ✗ |
-| Review text (read) | ✓ | ✗ | ✗ (use Apple RSS) |
+| Review text (read) | ✓ | ✗ | ✗ (scrape `apps.apple.com`) |
 
 For first-party sales/revenue/subscription analysis, see the `asc-metrics` skill — it parses the Sales & Finance reports above directly.

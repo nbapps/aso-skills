@@ -167,7 +167,7 @@ Skills work standalone with general ASO knowledge. For real-time data they compo
 | **[Astro MCP](tools/integrations/astro.md)** | Keyword tracking, rankings (+ history), ratings, search, AI suggestions, competitor keyword extraction | Bearer token (MCP) |
 | **[Sensor Tower public](tools/integrations/sensor-tower.md)** | App metadata, screenshots, monthly downloads & revenue estimates | None |
 | **[iTunes Lookup](tools/integrations/itunes-lookup.md)** | Release notes / What's New, per-country metadata | None |
-| **[Apple RSS reviews](tools/integrations/apple-rss-reviews.md)** | Up to 500 most recent user reviews per country | None |
+| **[App Store reviews (web scrape)](tools/integrations/apple-reviews-scrape.md)** | ~40 SSR-rendered reviews per country per request (the public RSS feed is effectively deprecated) | None |
 
 Astro MCP config:
 

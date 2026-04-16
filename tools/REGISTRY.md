@@ -11,7 +11,7 @@ The skills rely on a small, composable stack of public and third-party sources:
 | **[Astro MCP](integrations/astro.md)** | Keywords, rankings, ratings, search, suggestions, competitor extraction | MCP config |
 | **[Sensor Tower (public)](integrations/sensor-tower.md)** | App metadata, screenshots, downloads & revenue estimates | No auth — public endpoint |
 | **[iTunes Lookup](integrations/itunes-lookup.md)** | Release notes / What's New, current version, IAP flag | No auth — public endpoint |
-| **[Apple RSS Reviews](integrations/apple-rss-reviews.md)** | User reviews (up to 500 most recent per country) | No auth — public feed |
+| **[App Store reviews (web scrape)](integrations/apple-reviews-scrape.md)** | User reviews scraped from `apps.apple.com` SSR (≈40 per country) | No auth — public HTML |
 
 > Market intelligence (movers, trending, featured, new releases) and first-party ASC data (exact downloads/revenue) are **not** covered by the current stack. Skills that depended on those are flagged below.
 
@@ -25,7 +25,7 @@ The skills rely on a small, composable stack of public and third-party sources:
 | Competitor screenshots (batch) | Sensor Tower `GET /api/ios/apps?app_ids=id1,id2,id3` | [sensor-tower.md](integrations/sensor-tower.md) |
 | Downloads estimate (monthly) | Sensor Tower `humanized_worldwide_last_month_downloads` | [sensor-tower.md](integrations/sensor-tower.md) |
 | Revenue estimate (monthly) | Sensor Tower `humanized_worldwide_last_month_revenue` | [sensor-tower.md](integrations/sensor-tower.md) |
-| User reviews (most recent, by country) | Apple RSS `/{cc}/rss/customerreviews/id=:id/sortBy=mostRecent/json` | [apple-rss-reviews.md](integrations/apple-rss-reviews.md) |
+| User reviews (most recent, by country) | Scrape `https://apps.apple.com/{cc}/app/_/id:id` (SSR JSON) | [apple-reviews-scrape.md](integrations/apple-reviews-scrape.md) |
 | App ratings (current + history) | Astro `get_app_ratings` | [astro.md](integrations/astro.md) |
 | App search | Astro `search_app_store` | [astro.md](integrations/astro.md) |
 | App tracking setup | Astro `add_app`, `list_apps` | [astro.md](integrations/astro.md) |
@@ -63,14 +63,14 @@ These capabilities were part of the previous stack but have no drop-in replaceme
 | `metadata-optimization` | Sensor Tower (metadata) · iTunes Lookup · Astro `get_app_keywords` |
 | `competitor-analysis` | Astro `extract_competitors_keywords`, `search_rankings` · Sensor Tower (competitor batch: metadata, screenshots, downloads/revenue) |
 | `screenshot-optimization` | Sensor Tower (screenshots + competitor screenshots) |
-| `review-management` | Apple RSS reviews · Astro `get_app_ratings` (history) |
+| `review-management` | App Store reviews (scrape) · Astro `get_app_ratings` (history) |
 | `localization` | Astro `get_keyword_suggestions`, `search_rankings` (per store) · Sensor Tower (per-country metadata) |
 | `app-launch` | Astro `search_app_store`, `get_keyword_suggestions` |
 | `ua-campaign` | Astro `search_rankings`, `get_keyword_suggestions` · Sensor Tower (revenue/downloads benchmarks) |
 | `apple-search-ads` | Astro `search_rankings`, `get_keyword_suggestions`, `add_keywords` |
 | `app-store-featured` | Sensor Tower (metadata) — market/featured data **not covered** (degraded) |
-| `retention-optimization` | Apple RSS reviews · Sensor Tower (downloads trend) |
-| `monetization-strategy` | Sensor Tower (revenue/downloads) · Apple RSS reviews · iTunes Lookup (IAP flag) |
+| `retention-optimization` | App Store reviews (scrape) · Sensor Tower (downloads trend) |
+| `monetization-strategy` | Sensor Tower (revenue/downloads) · App Store reviews (scrape) · iTunes Lookup (IAP flag) |
 | `app-analytics` | Sensor Tower (downloads/revenue) · Astro `search_rankings` |
 | `ab-test-store-listing` | Sensor Tower (screenshots, metadata) · Astro `get_app_ratings` |
 | `app-marketing-context` | Sensor Tower (metadata) · Astro `get_app_keywords`, `search_app_store` |
@@ -79,14 +79,14 @@ These capabilities were part of the previous stack but have no drop-in replaceme
 | `asc-metrics` | Official [App Store Connect API](integrations/app-store-connect.md) (JWT auth) |
 | `seasonal-aso` | Astro `get_keyword_suggestions`, `search_rankings` |
 | `in-app-events` | Astro `get_keyword_suggestions`, `search_rankings` · Sensor Tower (metadata) |
-| `android-aso` | Apple RSS reviews (cross-ref only) · general knowledge (Play Store has no public API equivalent) |
-| `onboarding-optimization` | Apple RSS reviews · Sensor Tower (downloads) |
-| `rating-prompt-strategy` | Astro `get_app_ratings` (history) · Apple RSS reviews |
+| `android-aso` | App Store reviews (scrape) (cross-ref only) · general knowledge (Play Store has no public API equivalent) |
+| `onboarding-optimization` | App Store reviews (scrape) · Sensor Tower (downloads) |
+| `rating-prompt-strategy` | Astro `get_app_ratings` (history) · App Store reviews (scrape) |
 | `app-icon-optimization` | Sensor Tower (icon + competitor icons) |
-| `subscription-lifecycle` | Sensor Tower (revenue) · Apple RSS reviews |
+| `subscription-lifecycle` | Sensor Tower (revenue) · App Store reviews (scrape) |
 | `app-clips` | Astro `search_rankings` · Sensor Tower (metadata) |
-| `competitor-tracking` | Astro `search_rankings`, `get_app_keywords`, `get_app_ratings` · Sensor Tower (metadata, downloads, revenue) · Apple RSS reviews |
-| `crash-analytics` | Apple RSS reviews · Astro `get_app_ratings` |
+| `competitor-tracking` | Astro `search_rankings`, `get_app_keywords`, `get_app_ratings` · Sensor Tower (metadata, downloads, revenue) · App Store reviews (scrape) |
+| `crash-analytics` | App Store reviews (scrape) · Astro `get_app_ratings` |
 | `press-and-pr` | Sensor Tower (metadata) · Astro `search_app_store` |
 
 ## Other Useful Tools

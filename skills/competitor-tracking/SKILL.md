@@ -69,9 +69,11 @@ Watch for:
 astro.get_app_ratings(appId: "ID1", store: "us", includeHistory: true)
 ```
 
-Pair with Apple RSS reviews for the qualitative story:
+Pair with scraped App Store reviews for the qualitative story:
 ```bash
-curl "https://itunes.apple.com/us/rss/customerreviews/id=ID1/sortBy=mostRecent/page=1/json"
+curl -sL -A "Mozilla/5.0" "https://apps.apple.com/us/app/_/idID1" -o /tmp/app.html
+# Extract the <script type="application/json"> block and walk for $kind == "Review"
+# See tools/integrations/apple-reviews-scrape.md for the Python extractor
 ```
 
 Watch for:
@@ -168,7 +170,7 @@ Ask your agent each Monday:
 compare their metadata, top keywords, ratings, and downloads/revenue to last week."
 ```
 
-The agent will combine Astro (`get_app_keywords`, `search_rankings`, `get_app_ratings`), Sensor Tower (metadata + estimates), iTunes Lookup (release notes) and Apple RSS (reviews) to produce the report.
+The agent will combine Astro (`get_app_keywords`, `search_rankings`, `get_app_ratings`), Sensor Tower (metadata + estimates), iTunes Lookup (release notes) and scraped App Store reviews to produce the report.
 
 ## Competitive Response Playbook
 

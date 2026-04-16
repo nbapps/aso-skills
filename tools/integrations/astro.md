@@ -139,14 +139,14 @@ Set, update, or delete a note on a tracked keyword. Pass an empty `note` to dele
 
 ```
 get_app_ratings (includeHistory: true) → detect rating drops
-→ paired with Apple RSS reviews to explain the drop
+→ paired with scraped App Store reviews to explain the drop
 ```
 
 ## What Astro Does NOT Cover
 
 - App metadata (title, description, screenshots) → use Sensor Tower
 - Release notes / What's New → use iTunes Lookup
-- User reviews (text) → use Apple RSS
+- User reviews (text) → scrape `apps.apple.com` (see [apple-reviews-scrape.md](apple-reviews-scrape.md))
 - Download / revenue estimates → use Sensor Tower
 - First-party ASC data → use the official App Store Connect API
 - Market movers, trending keywords, featured apps, chart rankings by country → not covered
