@@ -98,6 +98,16 @@ Use in `localization` to audit per-country listings.
 | `app-marketing-context` | Seed version info, min OS, supported devices |
 | `monetization-strategy` | Price + formattedPrice baseline |
 
+## Caching
+
+Apple rate-limits this endpoint to ~20 req/min per IP. Use [`tools/cached-curl.sh`](../cached-curl.sh) with a 24h TTL:
+
+```bash
+tools/cached-curl.sh 86400 "https://itunes.apple.com/lookup?id=544007664&country=us"
+```
+
+Release notes and version only change on a new release, so daily caching covers virtually every use case. Drop to 1h (`3600`) on release day if you need to see the `releaseNotes` / `currentVersionReleaseDate` update quickly.
+
 ## Limitations
 
 - **iOS only.**

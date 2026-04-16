@@ -145,6 +145,16 @@ curl "https://itunes.apple.com/lookup?id=544007664&country=us"
 
 See [itunes-lookup.md](itunes-lookup.md).
 
+## Caching
+
+Rate limits are undocumented and this endpoint powers the Sensor Tower web app — be gentle. Use [`tools/cached-curl.sh`](../cached-curl.sh) with a 24h TTL:
+
+```bash
+tools/cached-curl.sh 86400 "https://app.sensortower.com/api/ios/apps?app_ids=1456241169"
+```
+
+Metadata changes on version ship; download / revenue buckets are monthly. 1 day is a safe default.
+
 ## Limitations
 
 - **iOS only** — no Google Play equivalent on this endpoint.

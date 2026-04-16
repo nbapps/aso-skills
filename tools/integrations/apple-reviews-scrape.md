@@ -142,6 +142,36 @@ Fetch the SSR batch (≈40 reviews)
 
 Most App Store pages render mostly 5-star and 1-star reviews — App Store's editorial curation favors the extremes. If you need mid-rating depth, paginate across countries or use App Store Connect API (your own app only).
 
+## Caching
+
+The `apps.apple.com` page is heavy (~800 KB) and scraping it repeatedly looks suspicious. Use [`tools/cached-curl.sh`](../cached-curl.sh) with a 6h TTL:
+
+```bash
+tools/cached-curl.sh 21600 \
+  "https://apps.apple.com/us/app/_/id1456241169" \
+  -A "Mozilla/5.0" > /tmp/mqrg-us.html
+
+# Then parse /tmp/mqrg-us.html as usual — or directly pipe:
+tools/cached-curl.sh 21600 "https://apps.apple.com/us/app/_/id1456241169" -A "Mozilla/5.0" \
+  | python3 -c 'import re, json, sys
+html = sys.stdin.read()
+m = re.search(r"<script[^>]*type=\"application/json\"[^>]*>(.*?)</script>", html, re.DOTALL)
+data = json.loads(m.group(1))
+reviews = []
+def walk(n):
+    if isinstance(n, dict):
+        if n.get("$kind") == "Review": reviews.append(n)
+        for v in n.values(): walk(v)
+    elif isinstance(n, list):
+        for v in n: walk(v)
+walk(data)
+for r in reviews:
+    print(r["rating"], "★", r.get("title"), "—", r.get("reviewerName"))
+'
+```
+
+6h keeps the signal warm without hammering Apple. Drop to 1h only if you are actively monitoring a rating crisis.
+
 ## Limitations
 
 - **~40 reviews per call, per country.** Apple does not return the full review list in SSR. The web page lazy-loads more via an authenticated AMP API (`amp-api.apps.apple.com`), which needs a Bearer token harvested from the page JS — fragile and subject to break.

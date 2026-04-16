@@ -150,6 +150,26 @@ GET /v1/financeReports
 - Weekly / Monthly / Yearly Sales reports — longer retention
 - Finance reports — available ~5 weeks after month-end
 
+### Helpers
+
+Two shell scripts keep JWT signing and response caching out of skill code:
+
+- **[`tools/asc-jwt.sh`](../asc-jwt.sh)** — reads `~/.config/aso/config.env` and the `.p8` key, emits an ES256 JWT (20-min expiry) on stdout. Dependencies: bash, openssl, python3 stdlib. No pip install required.
+- **[`tools/cached-curl.sh`](../cached-curl.sh)** — `curl` wrapper caching GET responses at `~/.cache/aso/<sha1>.body` with a configurable TTL.
+
+```bash
+# One-off JWT
+JWT=$(tools/asc-jwt.sh)
+curl -H "Authorization: Bearer $JWT" https://api.appstoreconnect.apple.com/v1/apps
+
+# Cached request (12h TTL for daily sales reports)
+tools/cached-curl.sh 43200 \
+  "https://api.appstoreconnect.apple.com/v1/salesReports?filter[frequency]=DAILY&filter[reportType]=SALES&filter[reportSubType]=SUMMARY&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-04-15" \
+  -H "Authorization: Bearer $JWT" -H "Accept: application/a-gzip"
+```
+
+See [tools/REGISTRY.md](../REGISTRY.md#helpers) for the full TTL table per source.
+
 ## When to Use App Store Connect vs Third-Party
 
 | Need | App Store Connect | Astro | Sensor Tower (public) |

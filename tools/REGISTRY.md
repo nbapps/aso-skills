@@ -38,6 +38,37 @@ The skills rely on a small, composable stack of public and third-party sources:
 | App's tracked keywords | Astro `get_app_keywords` | [astro.md](integrations/astro.md) |
 | Keyword tags & notes (organization) | Astro `manage_tag`, `set_keyword_tag`, `set_keyword_note` | [astro.md](integrations/astro.md) |
 
+## Helpers
+
+Two shell scripts in `tools/` reduce boilerplate and keep rate-limit pressure down. Both are zero-dep (bash + openssl + python3 stdlib + curl).
+
+| Helper | Purpose |
+|--------|---------|
+| [`tools/asc-jwt.sh`](asc-jwt.sh) | Reads `~/.config/aso/config.env` + the `.p8` key, emits a short-lived (20 min) ES256 JWT for the App Store Connect API on stdout. `JWT=$(tools/asc-jwt.sh)`. |
+| [`tools/cached-curl.sh`](cached-curl.sh) | `curl` wrapper that caches GET responses on disk at `~/.cache/aso/<sha1>.body`. Usage: `tools/cached-curl.sh <ttl-sec> <url> [curl-args...]`. Env: `ASO_CACHE_OFF=1` bypasses, `ASO_CACHE_DRY=1` reads cache only. |
+
+### Recommended TTLs per source
+
+| Source | TTL | Reasoning |
+|--------|-----|-----------|
+| Sensor Tower `/api/ios/apps` | **86400** (1d) | Metadata changes on update; downloads/revenue buckets are monthly |
+| iTunes Lookup `/lookup` | **86400** (1d) | Release notes change only on new version shipping |
+| `apps.apple.com` scrape (reviews) | **21600** (6h) | Recent reviews stream in — 6h keeps signal warm |
+| ASC `/v1/apps` | **86400** (1d) | App list rarely changes |
+| ASC `/v1/salesReports` daily | **43200** (12h) | Daily reports settle within hours but don't change once stable |
+| ASC `/v1/financeReports` monthly | **2592000** (30d) | Monthly reports are final after ~5 weeks |
+| ASC `/v1/apps/{id}/customerReviews` | **3600** (1h) | Balance freshness with review traffic |
+| Astro MCP | **not cached via this helper** — the MCP has its own data freshness and local DB |
+
+Combine helpers:
+
+```bash
+JWT=$(tools/asc-jwt.sh)
+tools/cached-curl.sh 43200 \
+  "https://api.appstoreconnect.apple.com/v1/salesReports?filter[frequency]=DAILY&filter[reportType]=SALES&filter[reportSubType]=SUMMARY&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-04-15" \
+  -H "Authorization: Bearer $JWT" -H "Accept: application/a-gzip"
+```
+
 ## Not Currently Covered
 
 These capabilities were part of the previous stack but have no drop-in replacement in the current one. Affected skills either degrade gracefully (run on general knowledge) or need a manual data source.
