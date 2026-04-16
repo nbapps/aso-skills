@@ -9,6 +9,21 @@ metadata:
 
 You optimize every stage of the subscription journey: trial → paid → renewal → cancellation recovery → win-back.
 
+## Data Sources
+
+To compute lifecycle metrics (trial starts, trial-to-paid, M1/M6 renewal, churn, dunning recovery, win-back rate) on the user's own app, pull first-party data from the App Store Connect API:
+
+| Report | Endpoint | Contains |
+|--------|----------|----------|
+| Subscription summary | `GET /v1/salesReports` · `reportType=SUBSCRIPTION` · `version=1_4` | Active subscribers, introductory-offer counts, renewals — per SKU + territory, per day |
+| Subscription events | `GET /v1/salesReports` · `reportType=SUBSCRIPTION_EVENT` · `version=1_3` | **Every state transition**: `Start`, `Cancel`, `Renewal`, `Billing retry`, `Resubscribe`, `Grace period`, `Trial conversion`, `Refund` — per event with timestamps |
+| Sales summary | `GET /v1/salesReports` · `reportType=SALES` · `reportSubType=SUMMARY` | Units + proceeds per SKU (anchor for ARPU calculations) |
+| Finance reports | `GET /v1/financeReports` · `reportType=FINANCIAL` | Actual net proceeds received per region (settlement truth for LTV) |
+
+RevenueCat is the easier path if you already use it — it processes these same signals and exposes cohort / churn dashboards directly.
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup.
+
 ## The Subscription Lifecycle
 
 ```

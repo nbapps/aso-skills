@@ -208,13 +208,63 @@ Skills work standalone with general ASO knowledge. For real-time data they compo
 
 ### First-Party ASC Data — `asc-metrics`
 
-The `asc-metrics` skill pulls directly from the **official [App Store Connect API](tools/integrations/app-store-connect.md)** — exact downloads, revenue, subscriptions, trials, and country breakdowns from Sales & Finance reports. Requires an ASC API key with the **Sales and Finance** role (JWT auth).
+The `asc-metrics` skill pulls directly from the **official [App Store Connect API](tools/integrations/app-store-connect.md)** — exact downloads, revenue, subscriptions, trials, and country breakdowns from Sales & Finance reports.
 
 ```
 "How are my downloads trending this month?"
 "What are my top 5 markets by revenue?"
 "Compare this month's subscriptions to last month"
 ```
+
+#### Setup
+
+**1. Create an API key in App Store Connect**
+
+Go to [App Store Connect](https://appstoreconnect.apple.com/access/integrations/api) → **Users and Access** → **Integrations** → **App Store Connect API** → click **+**.
+
+- **Name:** any (e.g. `ASO Skills`)
+- **Role:** **Admin** (recommended — one key covers Sales, Finance, reviews, versions). A key can hold only one role, so if you want strict separation, create two keys: one `Sales` (for `/v1/salesReports`) and one `Finance` (for `/v1/financeReports`).
+- Click **Generate**, then **Download API Key** — the `.p8` file is only downloadable **once**. Store it safely. If lost, the key must be revoked and regenerated.
+
+**2. Gather the three IDs**
+
+| ID | Where to find it |
+|----|------------------|
+| **Key ID** (10 chars) | Shown on the same page, next to the key you just created (e.g. `K83TLBA447`) |
+| **Issuer ID** (UUID) | Top of the **App Store Connect API** page (e.g. `57246542-96fe-1a63-e053-0824d011072a`) |
+| **Vendor Number** (8 digits) | [Payments and Financial Reports](https://appstoreconnect.apple.com/itc/payments_and_financial_reports) → top of page (e.g. `Vendor # 80123456`) |
+
+**3. Drop the files in `~/.config/aso/`**
+
+> **Do not rename the `.p8` file.** Skills derive the key path from the `ASC_KEY_ID` env var using the convention `~/.config/aso/AuthKey_${ASC_KEY_ID}.p8` — the Apple-assigned filename must be preserved.
+
+```bash
+mkdir -p ~/.config/aso
+
+# Move the downloaded .p8 without renaming it
+mv ~/Downloads/AuthKey_<KEY_ID>.p8 ~/.config/aso/
+
+# Create config.env
+cat > ~/.config/aso/config.env <<'EOF'
+ASC_KEY_ID=<10-char Key ID>
+ASC_ISSUER_ID=<UUID>
+ASC_VENDOR_NUMBER=<8-digit number>
+EOF
+
+# Lock down permissions — the .p8 is a private key
+chmod 700 ~/.config/aso
+chmod 600 ~/.config/aso/config.env ~/.config/aso/AuthKey_*.p8
+```
+
+**4. Verify**
+
+```bash
+source ~/.config/aso/config.env
+echo "Key: $ASC_KEY_ID · Issuer: $ASC_ISSUER_ID · Vendor: $ASC_VENDOR_NUMBER"
+ls -l ~/.config/aso/AuthKey_${ASC_KEY_ID}.p8
+```
+
+Both files should be listed with `-rw-------` perms. Skills and any helper script then build the JWT from `config.env` + the `.p8` file on demand (ES256, 20-min expiry, audience `appstoreconnect-v1`) — see [tools/integrations/app-store-connect.md](tools/integrations/app-store-connect.md) for the full endpoint reference.
 
 ### Not Covered
 

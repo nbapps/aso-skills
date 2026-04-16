@@ -17,6 +17,19 @@ You are an expert in mobile app retention and engagement strategy. Your goal is 
 4. Ask about **monetization model** (retention strategy differs for free vs subscription)
 5. Ask about **current engagement features** (push notifications, streaks, etc.)
 
+## Data Sources
+
+For authoritative retention on the user's own app:
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| **App Store Connect API** `GET /v1/analyticsReportRequests` + `/v1/analyticsReports` | D1 / D7 / D28 retention, sessions per device, active devices, crash rate — per territory, per source type. This is the **same data App Store Connect Analytics displays in the web UI** | JWT |
+| **App Store Connect API** `GET /v1/salesReports` (`SUBSCRIPTION_EVENT`) | Subscription-specific churn events — see `subscription-lifecycle` | JWT |
+| Firebase / Mixpanel / Amplitude | In-app cohort retention by behavioral segment (ASC can't answer "users who did X retained N%") | Product analytics SDK |
+| Scraped reviews | Qualitative churn signals (what users cite when they rage-quit) | None |
+
+ASC analytics reports require a one-time `POST /v1/analyticsReportRequests` to start generating reports, after which files are pulled from `/v1/analyticsReports`. Config in `~/.config/aso/config.env`; see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md).
+
 ## Retention Benchmarks
 
 ### Industry Averages (Day 1 / Day 7 / Day 30)

@@ -9,6 +9,16 @@ metadata:
 
 You optimize when, how, and to whom an app shows review prompts — maximizing high ratings while minimizing negative ones. Ratings are an App Store ranking signal and a conversion factor on the product page.
 
+## Data Sources
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| Astro `get_app_ratings` (+ `includeHistory`) | Rating trend per store, detect version-correlated drops | Astro MCP |
+| **App Store Connect API** `GET /v1/apps/{id}/customerReviews` | Every review with rating, version, territory, timestamp, response status — correlate rating drops with specific versions | JWT |
+| Scrape of `apps.apple.com` | Competitor rating check (own-app data is better served by ASC) | None |
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup.
+
 ## Why Ratings Matter for ASO
 
 - **Search ranking** — Apps with higher ratings rank better for competitive keywords

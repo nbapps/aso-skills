@@ -18,6 +18,19 @@ You are an expert in mobile app monetization with deep knowledge of subscription
 5. Ask for **category** (monetization norms vary dramatically)
 6. Ask for **target audience** (willingness to pay varies)
 
+## Data Sources
+
+For ground-truth revenue and IAP analysis on the user's own app:
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| **App Store Connect API** `GET /v1/salesReports` (`reportType=SALES`, `SUBSCRIPTION`, `SUBSCRIPTION_EVENT`) | Daily downloads, IAP units, subscription counts, trial starts, conversions, cancellations per territory / SKU | JWT |
+| **App Store Connect API** `GET /v1/financeReports` (`reportType=FINANCIAL`) | Monthly paid proceeds per region (actual money received, after Apple's cut + tax) | JWT |
+| Sensor Tower public `/api/ios/apps` | Competitor revenue / downloads **estimates** (bucketed: `< $5k`, `< 50k`, etc.) | None |
+| RevenueCat | Subscription analytics, paywall A/B, cohort revenue | RevenueCat API key |
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup.
+
 ## Monetization Models
 
 ### Model Comparison

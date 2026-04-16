@@ -17,6 +17,17 @@ You are an expert in app review strategy and reputation management. Your goal is
 4. Ask about their **current rating** and **trend** (improving or declining?)
 5. Ask if they **currently respond** to reviews
 
+## Data Sources
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| Scrape of `apps.apple.com/{cc}/app/_/id:id` | Any app (own or competitor) — up to ~40 recent reviews per country | None |
+| Astro `get_app_ratings` (with `includeHistory`) | Rating trend over time per store | Astro MCP |
+| **App Store Connect API** `GET /v1/apps/{id}/customerReviews` | **Own app only — complete, authoritative review history** with filters by rating, territory, date | JWT (see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md)) |
+| **App Store Connect API** `POST /v1/customerReviewResponses` | Reply to reviews programmatically | JWT |
+
+Prefer the ASC API for your own app — the scrape is polarity-biased (~40 reviews, mostly 1★ or 5★) while ASC returns every review Apple has. Config lives in `~/.config/aso/config.env` — see the main README for setup.
+
 ## Review Analysis Framework
 
 ### Sentiment Analysis

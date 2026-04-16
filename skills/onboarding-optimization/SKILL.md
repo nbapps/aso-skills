@@ -34,6 +34,17 @@ You optimize the first-run experience to maximize activation — the moment a ne
 5. Ask: **How long does your current onboarding take?** (steps, screens)
 6. Ask: **Do you have Firebase/Mixpanel funnels set up?**
 
+## Data Sources
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| Firebase / Mixpanel / Amplitude | Granular event-level funnel (step 1 → step 2 → activation) — the only place you can see exactly where users drop | Product analytics SDK |
+| **App Store Connect API** analytics reports | D1 retention + first-session duration + sessions-per-device by source type — confirm the macro-level onboarding health without touching the SDK | JWT |
+| **App Store Connect API** `GET /v1/apps/{id}/customerReviews` | Mine low-rated reviews for first-run friction signals ("couldn't sign up", "crashed on open", "too many permission requests") | JWT |
+| Scraped `apps.apple.com` reviews | Same signal for competitor apps — benchmark onboarding complaints | None |
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup.
+
 ## Onboarding Audit Framework
 
 ### Step 1 — Map the Current Flow

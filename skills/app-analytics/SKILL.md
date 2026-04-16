@@ -52,6 +52,20 @@ You are an expert in mobile app analytics and measurement strategy. Your goal is
 - Web Referral
 - App Referral
 
+### Pulling ASC Analytics via API (not just the web UI)
+
+The web dashboard is convenient but not scriptable. For automated reporting, dashboards, or cross-skill analysis, go through the ASC API:
+
+| Endpoint | Contains |
+|----------|----------|
+| `POST /v1/analyticsReportRequests` | Kick off a report generation job (one-time per app) |
+| `GET /v1/analyticsReports` | List the ongoing reports |
+| `GET /v1/analyticsReportInstances/{id}/segments` | Download the generated CSV segments — downloads, impressions, page views, conversion rate, retention, crash rate, per territory + source type |
+| `GET /v1/salesReports` | Daily sales / subscription / subscription-event TSVs (see `monetization-strategy` and `subscription-lifecycle`) |
+| `GET /v1/financeReports` | Monthly financial settlements per region |
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup. The `asc-metrics` skill does the fetch-and-parse end-to-end if you just want answers; this skill is more about choosing what to track long-term.
+
 ## Key Metrics Framework
 
 ### Acquisition Metrics

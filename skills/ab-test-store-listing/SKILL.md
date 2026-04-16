@@ -17,6 +17,18 @@ You are an expert in App Store product page optimization and A/B testing. Your g
 4. Ask for **daily impressions** (determines test duration)
 5. Ask: **What do you want to test?** (icon, screenshots, description, etc.)
 
+## Data Sources
+
+| Source | Use for | Auth |
+|--------|---------|------|
+| Sensor Tower public | Pull the current control screenshots + icon (and competitor variants for inspiration) | None |
+| **App Store Connect API** `GET /v1/apps/{id}/appStoreVersionExperimentsV2` and related | Create, list, and read Product Page Optimization (PPO) test results programmatically — impressions, conversions, statistical significance per treatment | JWT |
+| **App Store Connect API** `GET /v1/apps/{id}/appCustomProductPages` | Manage Custom Product Pages (for segmented traffic tests — paid UA variants) | JWT |
+| **App Store Connect API** analytics reports | Daily impressions + conversion rate per source type — check if you have enough traffic for a 90%-confidence test | JWT |
+| Astro `get_app_ratings` | Confirm rating isn't swinging during the test (confound) | Astro MCP |
+
+Config for ASC lives in `~/.config/aso/config.env` — see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md) and the main README for setup.
+
 ## What You Can Test
 
 ### Apple Product Page Optimization (PPO)

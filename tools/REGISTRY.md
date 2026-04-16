@@ -50,9 +50,17 @@ These capabilities were part of the previous stack but have no drop-in replaceme
 | Featured apps / editorial | `app-store-featured`, `market-pulse` |
 | New releases feed | `market-pulse` |
 | Downloads-to-top (rank → volume) | `market-movers`, `app-launch` |
-| First-party ASC data (exact downloads/revenue/subs) | `asc-metrics` — use the official [App Store Connect API](integrations/app-store-connect.md) directly |
-| In-app purchase list | `monetization-strategy`, `subscription-lifecycle` — IAP flag is available via iTunes Lookup, but not the full list |
-| Review sentiment analysis (pre-computed) | `review-management`, `retention-optimization` — compute from RSS reviews in-skill |
+| In-app purchase list | `monetization-strategy`, `subscription-lifecycle` — IAP flag is available via iTunes Lookup, full catalog via ASC API `GET /v1/inAppPurchasesV2` on the **own app** only |
+| Review sentiment analysis (pre-computed) | `review-management`, `retention-optimization` — compute from scraped or ASC reviews in-skill |
+
+**Covered via the official ASC API** (own app only, requires setup — see [tools/integrations/app-store-connect.md](integrations/app-store-connect.md) and the root README):
+
+- Exact downloads / units / revenue (Sales reports)
+- Subscription counts + every state transition (Subscription + Subscription Event reports)
+- Actual net proceeds per region (Finance reports)
+- App Store Connect Analytics (D1 / D7 / D28 retention, sessions, crashes, conversion rate, impressions)
+- Complete review history with filters (`customerReviews`) + programmatic responses
+- Product Page Optimization experiments + Custom Product Pages
 
 ## Skill → Tool Mapping
 
@@ -63,26 +71,26 @@ These capabilities were part of the previous stack but have no drop-in replaceme
 | `metadata-optimization` | Sensor Tower (metadata) · iTunes Lookup · Astro `get_app_keywords` |
 | `competitor-analysis` | Astro `extract_competitors_keywords`, `search_rankings` · Sensor Tower (competitor batch: metadata, screenshots, downloads/revenue) |
 | `screenshot-optimization` | Sensor Tower (screenshots + competitor screenshots) |
-| `review-management` | App Store reviews (scrape) · Astro `get_app_ratings` (history) |
+| `review-management` | App Store reviews (scrape) · Astro `get_app_ratings` (history) · **ASC API** `/v1/apps/{id}/customerReviews` (own app, authoritative) |
 | `localization` | Astro `get_keyword_suggestions`, `search_rankings` (per store) · Sensor Tower (per-country metadata) |
 | `app-launch` | Astro `search_app_store`, `get_keyword_suggestions` |
-| `ua-campaign` | Astro `search_rankings`, `get_keyword_suggestions` · Sensor Tower (revenue/downloads benchmarks) |
+| `ua-campaign` | Astro `search_rankings`, `get_keyword_suggestions` · Sensor Tower (revenue/downloads benchmarks) · **ASC API** Sales reports (CAC × LTV math with real revenue) |
 | `apple-search-ads` | Astro `search_rankings`, `get_keyword_suggestions`, `add_keywords` |
 | `app-store-featured` | Sensor Tower (metadata) — market/featured data **not covered** (degraded) |
-| `retention-optimization` | App Store reviews (scrape) · Sensor Tower (downloads trend) |
-| `monetization-strategy` | Sensor Tower (revenue/downloads) · App Store reviews (scrape) · iTunes Lookup (IAP flag) |
-| `app-analytics` | Sensor Tower (downloads/revenue) · Astro `search_rankings` |
-| `ab-test-store-listing` | Sensor Tower (screenshots, metadata) · Astro `get_app_ratings` |
+| `retention-optimization` | App Store reviews (scrape) · Sensor Tower (downloads trend) · **ASC API** analytics reports (D1/D7/D28 retention) |
+| `monetization-strategy` | Sensor Tower (competitor revenue/downloads) · App Store reviews (scrape) · iTunes Lookup (IAP flag) · **ASC API** Sales + Finance reports (own-app revenue truth) |
+| `app-analytics` | Sensor Tower (downloads/revenue) · Astro `search_rankings` · **ASC API** analytics + sales + finance reports |
+| `ab-test-store-listing` | Sensor Tower (screenshots, metadata) · Astro `get_app_ratings` · **ASC API** PPO experiments + Custom Product Pages |
 | `app-marketing-context` | Sensor Tower (metadata) · Astro `get_app_keywords`, `search_app_store` |
 | `market-movers` | **Not covered** — relies on general knowledge + Astro `search_app_store` |
 | `market-pulse` | **Not covered** — relies on general knowledge + Astro `search_app_store` |
-| `asc-metrics` | Official [App Store Connect API](integrations/app-store-connect.md) (JWT auth) |
+| `asc-metrics` | **ASC API** (primary) — Sales, Subscription, Subscription Event, Finance reports |
 | `seasonal-aso` | Astro `get_keyword_suggestions`, `search_rankings` |
 | `in-app-events` | Astro `get_keyword_suggestions`, `search_rankings` · Sensor Tower (metadata) |
-| `onboarding-optimization` | App Store reviews (scrape) · Sensor Tower (downloads) |
-| `rating-prompt-strategy` | Astro `get_app_ratings` (history) · App Store reviews (scrape) |
+| `onboarding-optimization` | App Store reviews (scrape) · Sensor Tower (downloads) · **ASC API** analytics reports (D1 retention, sessions/device) + `customerReviews` for friction mining |
+| `rating-prompt-strategy` | Astro `get_app_ratings` (history) · App Store reviews (scrape) · **ASC API** `/v1/apps/{id}/customerReviews` (version-correlated drops) |
 | `app-icon-optimization` | Sensor Tower (icon + competitor icons) |
-| `subscription-lifecycle` | Sensor Tower (revenue) · App Store reviews (scrape) |
+| `subscription-lifecycle` | Sensor Tower (competitor revenue) · App Store reviews (scrape) · **ASC API** Subscription + Subscription Event + Finance reports |
 | `app-clips` | Astro `search_rankings` · Sensor Tower (metadata) |
 | `competitor-tracking` | Astro `search_rankings`, `get_app_keywords`, `get_app_ratings` · Sensor Tower (metadata, downloads, revenue) · App Store reviews (scrape) |
 | `crash-analytics` | App Store reviews (scrape) · Astro `get_app_ratings` |
