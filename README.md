@@ -2,13 +2,6 @@
 
 
 <img width="1536" height="1024" alt="image" src="hero.png" />
-<div align="center">
-<p align="center">
-  <a href="https://www.linkedin.com/in/erencanarica/">
-    <img src="https://img.shields.io/badge/Follow on LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Follow on LinkedIn" />
-  </a>
-  </p>
-</div>
 
 AI agent skills for App Store Optimization (ASO) and mobile app marketing. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any [Agent Skills](https://agentskills.io)-compatible AI assistant to help with keyword research, metadata optimization, competitor analysis, and app growth.
 

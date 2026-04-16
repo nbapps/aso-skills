@@ -1,37 +1,49 @@
 {
   "name": "aso-skills",
   "owner": {
-    "name": "Erencan"
+    "name": "NBApps"
   },
   "metadata": {
-    "description": "ASO & App Marketing skills for Claude Code — keyword research, metadata optimization, competitor analysis, and app growth",
+    "description": "ASO & App Marketing skills for Claude Code — keyword research, metadata optimization, competitor analysis, ASC metrics, and app growth",
     "version": "1.0.0",
     "repository": "https://github.com/nbapps/aso-skills"
   },
   "plugins": [
     {
       "name": "aso-skills",
-      "description": "17 ASO and app marketing skills for indie developers, app marketers, and growth teams. Covers keyword research, metadata optimization, competitor analysis, market intelligence, chart tracking, screenshot design, review management, localization, user acquisition, monetization, and more.",
+      "description": "29 ASO and app marketing skills for indie developers, app marketers, and growth teams. Covers keyword research, metadata optimization, competitor analysis, market intelligence, screenshot design, review management, localization, user acquisition, monetization, subscription lifecycle, retention, ASC first-party metrics, crash analytics, Apple Search Ads, App Clips, and more.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/app-marketing-context",
-        "./skills/aso-audit",
-        "./skills/keyword-research",
-        "./skills/metadata-optimization",
-        "./skills/competitor-analysis",
-        "./skills/app-launch",
-        "./skills/screenshot-optimization",
-        "./skills/review-management",
-        "./skills/localization",
-        "./skills/retention-optimization",
-        "./skills/monetization-strategy",
-        "./skills/ua-campaign",
-        "./skills/app-store-featured",
-        "./skills/app-analytics",
         "./skills/ab-test-store-listing",
+        "./skills/app-analytics",
+        "./skills/app-clips",
+        "./skills/app-icon-optimization",
+        "./skills/app-launch",
+        "./skills/app-marketing-context",
+        "./skills/app-store-featured",
+        "./skills/apple-search-ads",
+        "./skills/asc-metrics",
+        "./skills/aso-audit",
+        "./skills/competitor-analysis",
+        "./skills/competitor-tracking",
+        "./skills/crash-analytics",
+        "./skills/in-app-events",
+        "./skills/keyword-research",
+        "./skills/localization",
         "./skills/market-movers",
-        "./skills/market-pulse"
+        "./skills/market-pulse",
+        "./skills/metadata-optimization",
+        "./skills/monetization-strategy",
+        "./skills/onboarding-optimization",
+        "./skills/press-and-pr",
+        "./skills/rating-prompt-strategy",
+        "./skills/retention-optimization",
+        "./skills/review-management",
+        "./skills/screenshot-optimization",
+        "./skills/seasonal-aso",
+        "./skills/subscription-lifecycle",
+        "./skills/ua-campaign"
       ]
     }
   ]
