@@ -264,7 +264,49 @@ echo "Key: $ASC_KEY_ID · Issuer: $ASC_ISSUER_ID · Vendor: $ASC_VENDOR_NUMBER"
 ls -l ~/.config/aso/AuthKey_${ASC_KEY_ID}.p8
 ```
 
-Both files should be listed with `-rw-------` perms. Skills and any helper script then build the JWT from `config.env` + the `.p8` file on demand (ES256, 20-min expiry, audience `appstoreconnect-v1`) — see [tools/integrations/app-store-connect.md](tools/integrations/app-store-connect.md) for the full endpoint reference.
+Both files should be listed with `-rw-------` perms.
+
+### Helpers & Caching
+
+Two zero-dep shell scripts in `tools/` keep the wiring between skills and external data clean:
+
+| Helper | What it does |
+|--------|--------------|
+| [`tools/asc-jwt.sh`](tools/asc-jwt.sh) | Reads `~/.config/aso/config.env` + the `.p8` key, emits an ES256 JWT (20-min expiry, audience `appstoreconnect-v1`) on stdout. Dependencies: `bash`, `openssl`, `python3` stdlib — no `pip install`. |
+| [`tools/cached-curl.sh`](tools/cached-curl.sh) | `curl` wrapper that caches GET responses at `~/.cache/aso/<sha1>.body` with a configurable TTL. Keeps rate-limit pressure off Sensor Tower, iTunes Lookup, the `apps.apple.com` scrape, and the ASC API. |
+
+Combined pattern:
+
+```bash
+JWT=$(tools/asc-jwt.sh)
+
+# 12h cache for daily Sales reports
+tools/cached-curl.sh 43200 \
+  "https://api.appstoreconnect.apple.com/v1/salesReports?filter[frequency]=DAILY&filter[reportType]=SALES&filter[reportSubType]=SUMMARY&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-04-15" \
+  -H "Authorization: Bearer $JWT" -H "Accept: application/a-gzip"
+```
+
+For reports that return empty until Apple settles them (e.g. Finance reports, which take ~5 weeks after month-end), layer a short fallback TTL on top of the main TTL — the cache re-fetches the empty response after the short window, but holds the populated one for the full duration:
+
+```bash
+# 30d when populated, 24h when empty
+ASO_CACHE_EMPTY_TTL=86400 tools/cached-curl.sh 2592000 \
+  "https://api.appstoreconnect.apple.com/v1/financeReports?filter[regionCode]=Z1&filter[reportType]=FINANCIAL&filter[vendorNumber]=$ASC_VENDOR_NUMBER&filter[reportDate]=2026-03" \
+  -H "Authorization: Bearer $JWT"
+```
+
+Recommended TTLs per source (full table in [tools/REGISTRY.md](tools/REGISTRY.md#helpers)):
+
+| Source | Main TTL | Empty TTL |
+|--------|----------|-----------|
+| Sensor Tower `/api/ios/apps` | 24h | — |
+| iTunes Lookup `/lookup` | 24h | — |
+| `apps.apple.com` scrape (reviews) | 6h | — |
+| ASC `/v1/apps` | 24h | — |
+| ASC `/v1/salesReports` daily | 12h | 24h (for days with no activity) |
+| ASC `/v1/financeReports` monthly | 30d | 24h (for months not yet settled) |
+| ASC `/v1/apps/{id}/customerReviews` | 1h | — |
+| Astro MCP | not cached (MCP has its own freshness) | — |
 
 ### Not Covered
 
