@@ -79,7 +79,6 @@ These capabilities were part of the previous stack but have no drop-in replaceme
 | `asc-metrics` | Official [App Store Connect API](integrations/app-store-connect.md) (JWT auth) |
 | `seasonal-aso` | Astro `get_keyword_suggestions`, `search_rankings` |
 | `in-app-events` | Astro `get_keyword_suggestions`, `search_rankings` · Sensor Tower (metadata) |
-| `android-aso` | App Store reviews (scrape) (cross-ref only) · general knowledge (Play Store has no public API equivalent) |
 | `onboarding-optimization` | App Store reviews (scrape) · Sensor Tower (downloads) |
 | `rating-prompt-strategy` | Astro `get_app_ratings` (history) · App Store reviews (scrape) |
 | `app-icon-optimization` | Sensor Tower (icon + competitor icons) |

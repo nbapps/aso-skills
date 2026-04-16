@@ -125,7 +125,6 @@ Pair with `astro.get_app_ratings` to correlate rating drops with review content 
 | `rating-prompt-strategy` | Pair with rating history to find version-specific issues |
 | `onboarding-optimization` | First-run friction mentioned in low-rated reviews |
 | `subscription-lifecycle` | Complaints about pricing / trial / cancellation flow |
-| `android-aso` | Cross-reference iOS complaints when Play Store is the target |
 | `competitor-tracking` | Weekly watch on competitor reviews for emerging issues |
 
 ## Common Patterns

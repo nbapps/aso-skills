@@ -117,7 +117,7 @@ AI-powered keyword suggestions for an app. Returns suggestions with popularity, 
 
 **Inputs:** `store` (required), `appId` or `appName`, `highPopularity` (default true).
 
-**Use in skills:** `keyword-research`, `seasonal-aso`, `in-app-events`, `localization`, `ua-campaign`, `apple-search-ads`, `android-aso`.
+**Use in skills:** `keyword-research`, `seasonal-aso`, `in-app-events`, `localization`, `ua-campaign`, `apple-search-ads`.
 
 ### `extract_competitors_keywords`
 
@@ -181,6 +181,19 @@ Set, update, or delete a note on a tracked keyword. Pass an empty `note` to dele
 get_app_ratings (includeHistory: true) → detect rating drops
 → paired with scraped App Store reviews to explain the drop
 ```
+
+## Rate Limits
+
+- **60 requests per minute** per client.
+- Requests above the threshold return **HTTP 429 Too Many Requests** — back off and retry.
+- No documented hourly / daily cap beyond the per-minute threshold.
+- The Astro team warns that MCP calls can burn a lot of AI-provider tokens — keep an eye on your Claude / Cursor usage dashboard.
+
+Tips when running broad skills (`aso-audit`, `competitor-tracking` on 5+ competitors):
+
+- Batch keyword tracking with `add_keywords` (up to 100 at a time) instead of calling per keyword.
+- Prefer `search_rankings` with `keyword` + `appId` filters instead of pulling all rankings.
+- Cache the result of long-running `search_rankings` + `includeHistory` calls locally — one request can return tens of rows × 30 history points and is expensive.
 
 ## What Astro Does NOT Cover
 

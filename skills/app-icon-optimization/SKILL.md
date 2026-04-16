@@ -166,5 +166,4 @@ Deliverables:
 
 - `ab-test-store-listing` — Full A/B testing methodology
 - `screenshot-optimization` — Complement the icon with strong screenshots
-- `android-aso` — Android adaptive icon requirements
 - `aso-audit` — Icon is one factor in the full ASO score

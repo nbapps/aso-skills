@@ -180,5 +180,4 @@ Recovery plan (if rating < 4.0):
 
 - `review-management` — Respond to reviews to recover rating
 - `onboarding-optimization` — Fix activation issues that drive 1-star reviews
-- `android-aso` — Play In-App Review API context
 - `retention-optimization` — Engaged users give better ratings

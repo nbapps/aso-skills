@@ -14,6 +14,8 @@ AI agent skills for App Store Optimization (ASO) and mobile app marketing. Built
 
 Powered by real App Store data via a small, composable stack: the **[Astro](https://tryastro.app?aff=z0Jlp)** MCP (keywords, rankings, ratings), **Sensor Tower**'s public endpoint (metadata, screenshots, downloads / revenue estimates), **iTunes Lookup** (release notes), and a **web scrape of `apps.apple.com`** for user reviews.
 
+> **Credits** — This repo is a fork and adaptation of [eronred/aso-skills](https://github.com/eronred/aso-skills) by [Erencan Arıca](https://www.linkedin.com/in/erencanarica/). The original skills were built on top of the Appeeky API; this fork swaps the data layer to the Astro MCP plus a few free public endpoints (Sensor Tower public, iTunes Lookup, `apps.apple.com` scrape), and reworks the skills that depended on Appeeky-only capabilities. All the ASO frameworks, scoring rubrics, and skill structure come from Erencan's original work — huge credit to him.
+
 ## Why This Exists
 
 Most ASO knowledge lives in blog posts, courses, and expensive consultants. We packaged it into skills that any AI agent can use — so you get expert-level ASO guidance directly in your IDE.
@@ -82,7 +84,7 @@ Then ask your agent:
 "My app has a crash affecting 2% of sessions — help me triage it"
 ```
 
-Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`, `/asc-metrics`, `/in-app-events`, `/seasonal-aso`, `/android-aso`, `/apple-search-ads`, `/competitor-tracking`
+Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`, `/asc-metrics`, `/in-app-events`, `/seasonal-aso`, `/apple-search-ads`, `/competitor-tracking`
 
 ## Skills
 
@@ -95,7 +97,6 @@ Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`,
 | [`metadata-optimization`](skills/metadata-optimization) | Writes title, subtitle, keyword field, description — with 3 variants and character counts |
 | [`competitor-analysis`](skills/competitor-analysis) | Keyword gaps, creative teardown, positioning map, and specific opportunities to exploit |
 | [`seasonal-aso`](skills/seasonal-aso) | Seasonal keyword calendar, metadata swap strategy, timing checklist, and trending-moment tactics |
-| [`android-aso`](skills/android-aso) | Google Play-specific ASO — indexed description strategy, short description, Play Experiments, rating recovery |
 
 ### Creative & International
 
