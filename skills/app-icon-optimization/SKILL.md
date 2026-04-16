@@ -111,7 +111,7 @@ Test one variable at a time:
 
 - **Primary metric:** Install conversion rate (impressions → installs)
 - **Minimum sample:** 1,000+ impressions per variant for reliable signal
-- **Significance threshold:** p < 0.05 or Appeeky/Play Console confidence indicator
+- **Significance threshold:** p < 0.05 or App Store Connect / Play Console confidence indicator
 
 ## Icon Audit
 

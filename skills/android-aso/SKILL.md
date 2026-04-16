@@ -86,12 +86,14 @@ Google Play indexes descriptions per language. Each locale is a fresh keyword op
 
 ## Keyword Research for Play Store
 
-Use Appeeky keyword tools, then adapt for Play:
+Use the Astro MCP keyword tools (iOS data as a proxy), then adapt for Play:
 
-```bash
-GET /v1/keywords/metrics?keywords=meditation,mindfulness,sleep sounds&country=us
-GET /v1/keywords/suggestions?term=meditation&country=us
 ```
+astro.add_keywords(store: "us", keywords: ["meditation","mindfulness","sleep sounds"], appId: "...")
+astro.get_keyword_suggestions(store: "us", appId: "...")
+```
+
+> Astro indexes iOS only. Treat the signal as directional — the Play algorithm weights semantic similarity and long-tail differently. Always cross-check with Play Console search terms.
 
 **Play-specific considerations:**
 - Long-tail phrases work well (full description is indexed)

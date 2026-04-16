@@ -79,11 +79,13 @@ Account
 - High-volume generic terms: "meditation app", "habit tracker", "budget planner"
 - Long-tail terms: "meditation app for anxiety", "daily habit tracker free"
 
-Use Appeeky to validate volume and difficulty:
-```bash
-GET /v1/keywords/metrics?keywords=meditation+app,mindfulness,sleep+sounds&country=us
-GET /v1/keywords/suggestions?term=meditation&country=us
+Use the Astro MCP to validate volume and difficulty:
 ```
+astro.add_keywords(store: "us", keywords: ["meditation app","mindfulness","sleep sounds"], appId: "...")
+astro.get_keyword_suggestions(store: "us", appId: "...")
+```
+
+Cross-reference the ASA Search Popularity Index with Astro popularity to avoid biasing on a single source.
 
 ### Negative Keywords
 

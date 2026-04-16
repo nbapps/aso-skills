@@ -1,31 +1,24 @@
 # ASO & App Marketing Skills
 
 
-<a href="https://www.appeeky.com">
-  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b5872442-99f9-4e66-8667-96eb03e55f98" />
-</a>
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b5872442-99f9-4e66-8667-96eb03e55f98" />
 <div align="center">
 <p align="center">
-  <a href="https://x.com/appeeky">
-    <img src="https://img.shields.io/badge/Follow on X-000000?style=for-the-badge&logo=x&logoColor=white" alt="Follow on X" />
-  </a>
   <a href="https://www.linkedin.com/in/erencanarica/">
     <img src="https://img.shields.io/badge/Follow on LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Follow on LinkedIn" />
   </a>
   </p>
 </div>
 
-AI agent skills for App Store Optimization (ASO) and mobile app marketing. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any [Agent Skills](https://agentskills.io)-compatible AI assistant to help with keyword research, metadata optimization, competitor analysis, market intelligence, and app growth.
+AI agent skills for App Store Optimization (ASO) and mobile app marketing. Built for indie developers, app marketers, and growth teams who want **Cursor**, **Claude Code**, or any [Agent Skills](https://agentskills.io)-compatible AI assistant to help with keyword research, metadata optimization, competitor analysis, and app growth.
 
-Powered by real App Store data via the [Appeeky API](https://docs.appeeky.com).
-
-A web version is also available, powered by AI chats and our MCP: [Appeeky Web](https://appeeky.com).
+Powered by real App Store data via a small, composable stack: the **Astro MCP** (keywords, rankings, ratings), **Sensor Tower public** endpoint (metadata, screenshots, downloads/revenue estimates), **iTunes Lookup** (release notes), and **Apple's RSS review feed** (user reviews).
 
 ## Why This Exists
 
 Most ASO knowledge lives in blog posts, courses, and expensive consultants. We packaged it into skills that any AI agent can use — so you get expert-level ASO guidance directly in your IDE.
 
-Each skill contains battle-tested frameworks, scoring rubrics, and output templates. The agent reads the skill, pulls real data from the App Store (via Appeeky), and gives you actionable recommendations — not generic advice.
+Each skill contains battle-tested frameworks, scoring rubrics, and output templates. The agent reads the skill, pulls real data from the App Store (via the Astro MCP, Sensor Tower's public endpoint, iTunes Lookup, and Apple's RSS reviews) and gives you actionable recommendations — not generic advice.
 
 ## Quick Start
 
@@ -107,7 +100,7 @@ Or invoke directly: `/aso-audit`, `/keyword-research`, `/metadata-optimization`,
 |-------|-------------|
 | [`app-analytics`](skills/app-analytics) | Event tracking plan, dashboard setup, KPI framework with category benchmarks |
 | [`ab-test-store-listing`](skills/ab-test-store-listing) | Hypothesis → variant design → sample size → interpretation for App Store A/B tests |
-| [`asc-metrics`](skills/asc-metrics) | Analyze your exact App Store Connect data (downloads, revenue, subscriptions, countries) via Appeeky Connect |
+| [`asc-metrics`](skills/asc-metrics) | Analyze your exact App Store Connect data (downloads, revenue, subscriptions, countries) via the official ASC API |
 | [`crash-analytics`](skills/crash-analytics) | Crashlytics setup, crash triage framework (P0–P3), symbolication, phased release strategy, rating recovery |
 
 ### Market Intelligence
@@ -131,7 +124,8 @@ You: "Run an ASO audit for Headspace"
 
 Agent:
   1. Reads aso-audit/SKILL.md (framework, scoring rubric, output template)
-  2. Calls Appeeky API → fetches metadata, keywords, ratings, competitors
+  2. Pulls metadata from Sensor Tower, release notes from iTunes Lookup,
+     keywords + ratings from Astro MCP, reviews from Apple's RSS feed
   3. Scores each factor (title: 8/10, subtitle: 6/10, keywords: 4/10...)
   4. Returns: ASO Score Card + Quick Wins + High-Impact Changes + Strategic Recs
 ```
@@ -164,28 +158,33 @@ git submodule add https://github.com/eronred/aso-skills.git .agents/aso-skills
 
 Works with any tool that supports the [Agent Skills](https://agentskills.io) standard (`.agents/skills/`, `.cursor/skills/`, `.claude/skills/`, `.codex/skills/`).
 
-## Appeeky Integration
+## Data Stack
 
-Skills work standalone with general ASO knowledge. Connect [Appeeky](https://docs.appeeky.com/mcp) for real-time App Store data:
+Skills work standalone with general ASO knowledge. For real-time data they compose four sources:
+
+| Source | Role | Auth |
+|--------|------|------|
+| **[Astro MCP](tools/integrations/astro.md)** | Keyword tracking, rankings (+ history), ratings, search, AI suggestions, competitor keyword extraction | Bearer token (MCP) |
+| **[Sensor Tower public](tools/integrations/sensor-tower.md)** | App metadata, screenshots, monthly downloads & revenue estimates | None |
+| **[iTunes Lookup](tools/integrations/itunes-lookup.md)** | Release notes / What's New, per-country metadata | None |
+| **[Apple RSS reviews](tools/integrations/apple-rss-reviews.md)** | Up to 500 most recent user reviews per country | None |
+
+Astro MCP config:
 
 ```json
 {
   "mcpServers": {
-    "appeeky": {
-      "url": "https://mcp.appeeky.com/mcp",
-      "headers": { "Authorization": "Bearer apk_your_key_here" }
+    "astro": {
+      "url": "https://mcp.astroaso.com/mcp",
+      "headers": { "Authorization": "Bearer your_astro_token" }
     }
   }
 }
 ```
 
-With Appeeky connected, skills can pull live keyword rankings, competitor metadata, download estimates, trending keywords, and featured apps.
+### First-Party ASC Data — `asc-metrics`
 
-### Appeeky Connect — First-Party ASC Data
-
-The `asc-metrics` skill uses **Appeeky Connect**, a new integration that syncs your exact App Store Connect data (downloads, revenue, subscriptions, trials, IAP, and country breakdowns) into Appeeky nightly.
-
-Connect once at [appeeky.com → Settings → Integrations](https://appeeky.com) and then ask:
+The `asc-metrics` skill pulls directly from the **official [App Store Connect API](tools/integrations/app-store-connect.md)** — exact downloads, revenue, subscriptions, trials, and country breakdowns from Sales & Finance reports. Requires an ASC API key with the **Sales and Finance** role (JWT auth).
 
 ```
 "How are my downloads trending this month?"
@@ -193,9 +192,9 @@ Connect once at [appeeky.com → Settings → Integrations](https://appeeky.com)
 "Compare this month's subscriptions to last month"
 ```
 
-Requires Indie plan( coffee price: $8/month) or higher. See [tools/integrations/appeeky-connect.md](tools/integrations/appeeky-connect.md) for the full API reference.
+### Not Covered
 
-See [tools/REGISTRY.md](tools/REGISTRY.md) for the full capability matrix.
+Market-wide intelligence (chart rankings by country, market movers, trending keywords, featured apps, new releases) is **not covered** by the current stack. Affected skills (`market-movers`, `market-pulse`, `app-store-featured`) degrade to general-knowledge output. See [tools/REGISTRY.md](tools/REGISTRY.md) for the full capability matrix.
 
 ## Contributing
 

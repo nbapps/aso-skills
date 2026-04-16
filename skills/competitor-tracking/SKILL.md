@@ -25,32 +25,37 @@ You set up and run ongoing competitor surveillance — catching metadata changes
 3. Ask: **How often do you want to review?** (weekly recommended)
 4. Ask: **What are you most concerned about?** (keywords, ratings, creative, pricing)
 
-Use Appeeky to identify competitors if unknown:
-```bash
-GET /v1/keywords/ranks?keyword=meditation&country=us&limit=10
-GET /v1/apps/:id/intelligence  # check competitors array
+Use the Astro MCP to identify competitors on a target keyword:
+```
+astro.search_app_store(keyword: "meditation", store: "us", limit: 10)
+astro.extract_competitors_keywords(keyword: "meditation", store: "us")  # only if keyword is tracked
 ```
 
 ## What to Track
 
 ### Metadata Changes
 
-Check weekly using Appeeky:
+Check weekly with Sensor Tower (batch) + iTunes Lookup for release notes:
 ```bash
-GET /v1/apps/:id  # title, subtitle, description
+# Metadata + screenshots + downloads/revenue for all competitors in one call
+curl "https://app.sensortower.com/api/ios/apps?app_ids=ID1,ID2,ID3"
+
+# Release notes / What's New (per competitor)
+curl "https://itunes.apple.com/lookup?id=ID1&country=us"
 ```
 
 Watch for:
-- **Title changes** — new keyword being targeted, repositioning
-- **Subtitle changes** — testing new hooks or keywords
-- **Description changes** — messaging strategy shift (Google Play especially)
+- **Title / subtitle / description changes** — new keyword targeting, repositioning
 - **Screenshot updates** — new creative direction or A/B test winner shipped
+- **Release notes** — signals what they shipped
+- **Downloads / revenue delta** — momentum vs last check
 
 ### Keyword Ranking Changes
 
-```bash
-GET /v1/apps/:id/keywords  # their ranking keywords
-GET /v1/keywords/ranks?keyword=[shared keyword]  # who's ranking where
+```
+astro.get_app_keywords(appId: "ID1", store: "us")             # competitor's tracked keywords
+astro.search_rankings(keyword: "<shared>", store: "us",       # who ranks where on a shared keyword
+                       includeHistory: true, period: "month")
 ```
 
 Watch for:
@@ -60,9 +65,13 @@ Watch for:
 
 ### Ratings and Reviews
 
+```
+astro.get_app_ratings(appId: "ID1", store: "us", includeHistory: true)
+```
+
+Pair with Apple RSS reviews for the qualitative story:
 ```bash
-GET /v1/apps/:id/reviews?sort=recent&limit=20
-GET /v1/apps/:id  # current rating
+curl "https://itunes.apple.com/us/rss/customerreviews/id=ID1/sortBy=mostRecent/page=1/json"
 ```
 
 Watch for:
@@ -72,14 +81,7 @@ Watch for:
 
 ### Chart Positions
 
-```bash
-GET /v1/market/movers?genre=[genre_id]&country=us
-GET /v1/categories/:id/top?country=us&limit=25
-```
-
-Watch for:
-- A competitor entering or exiting top 10 in your category
-- New competitor entering your space from a chart rise
+> Category charts and market movers are **not covered** by the current stack — infer momentum from Sensor Tower downloads/revenue deltas and Astro rankings on category-defining keywords.
 
 ### Pricing and Paywall
 
@@ -135,35 +137,38 @@ Run a full `competitor-analysis` when:
 
 ### Manual (recommended for small teams)
 
-Set a calendar reminder. Run the Appeeky API calls above. Fill the template.
+Set a calendar reminder. Run the Astro MCP calls + Sensor Tower / iTunes Lookup / RSS fetches above. Fill the template.
 
 ### Semi-automated
 
-Build a script that calls Appeeky weekly and diffs results:
+Build a script that pulls the baseline weekly and diffs results:
 
 ```bash
 #!/bin/bash
-APPS=("6759740679" "987654321" "111222333")
-KEY="apk_your_key"
+APPS="6759740679,987654321,111222333"
 
-for APP_ID in "${APPS[@]}"; do
-  echo "=== $APP_ID ==="
-  curl -s "https://api.appeeky.com/v1/apps/$APP_ID" \
-    -H "X-API-Key: $KEY" | jq '.data | {title, subtitle, rating, reviewCount}'
+# One call returns metadata + screenshots + downloads/revenue for all competitors
+curl -s "https://app.sensortower.com/api/ios/apps?app_ids=$APPS" \
+  | jq '.[] | {app_id, name, version, humanized_worldwide_last_month_downloads, humanized_worldwide_last_month_revenue, current_version_rating, current_version_rating_count}'
+
+# Release notes per competitor
+for APP_ID in ${APPS//,/ }; do
+  curl -s "https://itunes.apple.com/lookup?id=$APP_ID&country=us" \
+    | jq '.results[] | {trackId, version, currentVersionReleaseDate, releaseNotes}'
 done
 ```
 
 Store results weekly and diff with the previous week's output.
 
-### Appeeky MCP (in Claude/Cursor)
+### Agent-driven (Claude / Cursor)
 
 Ask your agent each Monday:
 ```
-"Run a competitor check on apps [ID1], [ID2], [ID3] and 
-compare their metadata and top keywords to last week."
+"Run a competitor check on apps [ID1], [ID2], [ID3] and
+compare their metadata, top keywords, ratings, and downloads/revenue to last week."
 ```
 
-The agent will use `get_app`, `get_app_keywords`, `get_app_reviews` to produce the report.
+The agent will combine Astro (`get_app_keywords`, `search_rankings`, `get_app_ratings`), Sensor Tower (metadata + estimates), iTunes Lookup (release notes) and Apple RSS (reviews) to produce the report.
 
 ## Competitive Response Playbook
 

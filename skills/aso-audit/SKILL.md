@@ -18,14 +18,17 @@ You are an expert in App Store Optimization with deep knowledge of Apple's and G
 
 ## Data Collection
 
-If Appeeky MCP or API is available, fetch:
-- App metadata (title, subtitle, description, screenshots, ratings)
-- Current keyword rankings
-- Competitor data (top 3-5 in same category)
-- Category chart position
-- Review sentiment
+Fetch from the primary stack (see [tools/REGISTRY.md](../../tools/REGISTRY.md)):
 
-If not available, ask the user to provide their current metadata.
+- **Sensor Tower public** (`/api/ios/apps?app_ids=:id`) — metadata (title, description, category, screenshots, icon, version, downloads/revenue estimates)
+- **iTunes Lookup** (`/lookup?id=:id&country=:cc`) — release notes / What's New, full description per country, supported languages
+- **Astro MCP** — `get_app_keywords`, `search_rankings` (+ `includeHistory`, `includeStatistics`), `get_app_ratings` (+ `includeHistory`)
+- **Apple RSS reviews** (`/{cc}/rss/customerreviews/id=:id/sortBy=mostRecent/json`) — sentiment signal
+- Competitor data (top 3–5 in same category) — batch-fetch metadata via Sensor Tower `app_ids=id1,id2,id3`
+
+> Category chart position (top-free/paid/grossing) is **not covered** by the current stack — skip the chart-position factor or ask the user for ASC data.
+
+If a source is unavailable, ask the user to paste the missing metadata directly.
 
 ## Audit Framework
 

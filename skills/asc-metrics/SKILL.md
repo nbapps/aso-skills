@@ -1,21 +1,21 @@
 ---
 name: asc-metrics
-description: When the user wants to analyze their own app's actual performance data from App Store Connect — real downloads, revenue, IAP, subscriptions, trials, or country breakdowns synced via Appeeky Connect. Use when the user asks about "my downloads", "my revenue", "how is my app performing", "ASC data", "sales and trends", "my subscription numbers", "App Store Connect metrics", or wants to compare periods or top markets. For third-party app estimates, see app-analytics. For subscription analytics depth, see monetization-strategy.
+description: When the user wants to analyze their own app's actual performance data from App Store Connect — real downloads, revenue, IAP, subscriptions, trials, or country breakdowns pulled directly from the official App Store Connect API. Use when the user asks about "my downloads", "my revenue", "how is my app performing", "ASC data", "sales and trends", "my subscription numbers", "App Store Connect metrics", or wants to compare periods or top markets. For third-party app estimates, see app-analytics. For subscription analytics depth, see monetization-strategy.
 metadata:
   version: 1.0.0
 ---
 
 # ASC Metrics
 
-You analyze the user's **official App Store Connect data** synced into Appeeky — exact downloads, revenue, IAP, subscriptions, and trials. This is first-party data, not estimates.
+You analyze the user's **official App Store Connect data** pulled directly from Apple's App Store Connect API — exact downloads, revenue, IAP, subscriptions, and trials. This is first-party data, not estimates.
 
 ## Prerequisites
 
-- Appeeky account with ASC connected (Settings → Integrations → App Store Connect)
-- Indie plan or higher (2 credits per request)
-- Data syncs nightly; up to 90 days of history available
+- App Store Connect API key with the **Sales and Finance** role (see [tools/integrations/app-store-connect.md](../../tools/integrations/app-store-connect.md))
+- JWT built from the `.p8` key, Issuer ID, and Key ID
+- Sales reports retention: rolling 365 days (daily), longer (weekly/monthly/yearly)
 
-If ASC is not connected, prompt the user to connect it at [appeeky.com/settings](https://appeeky.com) and return.
+If the user hasn't generated an API key yet, point them to App Store Connect → Users and Access → Integrations → App Store Connect API and return.
 
 ## Initial Assessment
 
@@ -26,29 +26,54 @@ If ASC is not connected, prompt the user to connect it at [appeeky.com/settings]
 
 ## Fetching Data
 
-### Step 1 — List available apps
+All endpoints below live under `https://api.appstoreconnect.apple.com/v1/` and require a JWT in `Authorization: Bearer <jwt>`.
+
+### Step 1 — List your apps
 
 ```bash
-GET /v1/connect/metrics/apps
+GET /v1/apps
 ```
 
-Match the user's app to an `app_apple_id` if not already known.
+Match the user's app to its `id` and `attributes.bundleId`.
 
-### Step 2 — Get overview (portfolio)
+### Step 2 — Pull Sales & Trends (portfolio or app)
 
 ```bash
-GET /v1/connect/metrics?from=YYYY-MM-DD&to=YYYY-MM-DD
+GET /v1/salesReports
+  ?filter[frequency]=DAILY
+  &filter[reportType]=SALES
+  &filter[reportSubType]=SUMMARY
+  &filter[vendorNumber]=<your vendor id>
+  &filter[reportDate]=YYYY-MM-DD
 ```
 
-### Step 3 — Get app detail (single app)
+Returns a gzipped TSV. Parse and aggregate per-date / per-country / per-sku.
+
+### Step 3 — Pull Subscription reports
 
 ```bash
-GET /v1/connect/metrics/apps/:appId?from=YYYY-MM-DD&to=YYYY-MM-DD
+GET /v1/salesReports
+  ?filter[frequency]=DAILY
+  &filter[reportType]=SUBSCRIPTION
+  &filter[reportSubType]=SUMMARY
+  &filter[vendorNumber]=<your vendor id>
+  &filter[version]=1_4
+  &filter[reportDate]=YYYY-MM-DD
 ```
 
-Response includes: `daily[]`, `countries[]`, `totals`.
+### Step 4 — Pull Finance reports (actual paid revenue, monthly)
 
-See full API reference: [appeeky-connect.md](../../tools/integrations/appeeky-connect.md)
+```bash
+GET /v1/financeReports
+  ?filter[regionCode]=Z1
+  &filter[reportType]=FINANCIAL
+  &filter[vendorNumber]=<your vendor id>
+  &filter[reportDate]=YYYY-MM
+```
+
+Build your own `daily[]`, `countries[]`, and `totals` from the parsed TSVs.
+
+See full integration guide: [app-store-connect.md](../../tools/integrations/app-store-connect.md)
 
 ## Analysis Frameworks
 

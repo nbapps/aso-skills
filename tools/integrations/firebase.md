@@ -114,7 +114,7 @@ Analytics.setUserProperty("feature_tier", forName: "power_user")
 
 ## When to Use Firebase vs Other Tools
 
-| Need | Firebase | App Store Connect | RevenueCat | Appeeky |
+| Need | Firebase | App Store Connect | RevenueCat | Astro |
 |------|---------|-------------------|-----------|---------|
 | In-app event tracking | ✓ | ✗ | ✗ | ✗ |
 | Custom funnels | ✓ | ✗ | ✗ | ✗ |
@@ -124,4 +124,4 @@ Analytics.setUserProperty("feature_tier", forName: "power_user")
 | Download attribution | ✓ | By source type | By source | ✗ |
 | Keyword rankings | ✗ | ✗ | ✗ | ✓ |
 | ASO data | ✗ | ✗ | ✗ | ✓ |
-| Cost | Free | Free | Free tier | Credit-based |
+| Cost | Free | Free | Free tier | Subscription |

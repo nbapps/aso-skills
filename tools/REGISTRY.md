@@ -2,96 +2,97 @@
 
 Tools and integrations that ASO skills can use for real-time App Store data.
 
-## Appeeky — Primary Integration
+## Primary Stack
 
-[Appeeky](https://appeeky.com) provides real-time App Store intelligence via REST API and MCP Server.
+The skills rely on a small, composable stack of public and third-party sources:
 
-### Connection Methods
+| Source | Role | Setup |
+|--------|------|-------|
+| **[Astro MCP](integrations/astro.md)** | Keywords, rankings, ratings, search, suggestions, competitor extraction | MCP config |
+| **[Sensor Tower (public)](integrations/sensor-tower.md)** | App metadata, screenshots, downloads & revenue estimates | No auth — public endpoint |
+| **[iTunes Lookup](integrations/itunes-lookup.md)** | Release notes / What's New, current version, IAP flag | No auth — public endpoint |
+| **[Apple RSS Reviews](integrations/apple-rss-reviews.md)** | User reviews (up to 500 most recent per country) | No auth — public feed |
 
-| Method | Best For | Setup |
-|--------|----------|-------|
-| **MCP Server** | Claude Code, Cursor, AI agents | Add to MCP config |
-| **REST API** | Scripts, dashboards, custom tools | HTTP requests with API key |
+> Market intelligence (movers, trending, featured, new releases) and first-party ASC data (exact downloads/revenue) are **not** covered by the current stack. Skills that depended on those are flagged below.
 
-### Capability Matrix
+## Capability Matrix
 
-| Capability | REST API | MCP Tool | Integration Guide |
-|-----------|----------|----------|-------------------|
-| App metadata & lookup | `GET /v1/apps/:id` | `get_app` | [appeeky.md](integrations/appeeky.md) |
-| App intelligence (downloads, revenue) | `GET /v1/apps/:id/intelligence` | `get_app_intelligence` | [appeeky.md](integrations/appeeky.md) |
-| User reviews | `GET /v1/apps/:id/reviews` | `get_app_reviews` | [appeeky.md](integrations/appeeky.md) |
-| App keyword rankings | `GET /v1/apps/:id/keywords` | `get_app_keywords` | [appeeky.md](integrations/appeeky.md) |
-| Keyword rank trends | `GET /v1/apps/:id/keywords/trends` | `get_keyword_trends` | [appeeky.md](integrations/appeeky.md) |
-| Country rankings | `GET /v1/apps/:id/country-rankings` | `get_country_rankings` | [appeeky.md](integrations/appeeky.md) |
-| Screenshots | `GET /v1/apps/:id/screenshots` | — | [appeeky.md](integrations/appeeky.md) |
-| Competitor screenshots | `GET /v1/apps/:id/screenshots/competitors` | — | [appeeky.md](integrations/appeeky.md) |
-| Keyword search volume & difficulty | `GET /v1/keywords/metrics` | `get_keyword_metrics` | [appeeky-keywords.md](integrations/appeeky-keywords.md) |
-| Keyword suggestions | `GET /v1/keywords/suggestions` | `get_keyword_suggestions` | [appeeky-keywords.md](integrations/appeeky-keywords.md) |
-| Keyword rankings | `GET /v1/keywords/ranks` | `get_keyword_ranks` | [appeeky-keywords.md](integrations/appeeky-keywords.md) |
-| Keyword comparison | `GET /v1/keywords/compare` | `compare_keywords` | [appeeky-keywords.md](integrations/appeeky-keywords.md) |
-| Trending keywords | `GET /v1/keywords/trending` | `get_trending_keywords` | [appeeky-keywords.md](integrations/appeeky-keywords.md) |
-| ASO audit | — | `aso_full_audit` | [appeeky-aso.md](integrations/appeeky-aso.md) |
-| Metadata validation | — | `aso_validate_metadata` | [appeeky-aso.md](integrations/appeeky-aso.md) |
-| Metadata suggestions | — | `aso_suggest_metadata` | [appeeky-aso.md](integrations/appeeky-aso.md) |
-| Keyword opportunities | — | `aso_find_opportunities` | [appeeky-aso.md](integrations/appeeky-aso.md) |
-| Competitor ASO report | — | `aso_competitor_report` | [appeeky-aso.md](integrations/appeeky-aso.md) |
-| App search | `GET /v1/search` | `search_apps` | [appeeky.md](integrations/appeeky.md) |
-| Market movers (gainers/losers) | `GET /v1/market/movers` | `get_market_movers` | [appeeky-market.md](integrations/appeeky-market.md) |
-| Market activity feed | `GET /v1/market/activity` | `get_market_activity` | [appeeky-market.md](integrations/appeeky-market.md) |
-| Category charts | `GET /v1/categories/:id/top` | `get_category_top` | [appeeky-market.md](integrations/appeeky-market.md) |
-| Downloads to top | `GET /v1/categories/:id/downloads-to-top` | `get_downloads_to_top` | [appeeky-market.md](integrations/appeeky-market.md) |
-| Featured apps | `GET /v1/featured` | `get_featured_apps` | [appeeky-market.md](integrations/appeeky-market.md) |
-| New releases | `GET /v1/new-releases` | `get_new_releases` | [appeeky-market.md](integrations/appeeky-market.md) |
-| Discovery feed | `GET /v1/discover` | `discover` | [appeeky-market.md](integrations/appeeky-market.md) |
-| New #1 apps | `GET /v1/discover/new-number-1` | `get_new_number_1` | [appeeky-market.md](integrations/appeeky-market.md) |
-| ASC overview metrics | `GET /v1/connect/metrics` | — | [appeeky-connect.md](integrations/appeeky-connect.md) |
-| ASC list apps | `GET /v1/connect/metrics/apps` | — | [appeeky-connect.md](integrations/appeeky-connect.md) |
-| ASC app detail (daily + countries) | `GET /v1/connect/metrics/apps/:appId` | — | [appeeky-connect.md](integrations/appeeky-connect.md) |
+| Capability | Tool / Endpoint | Integration Guide |
+|-----------|-----------------|-------------------|
+| App metadata (name, description, publisher, category, version) | Sensor Tower `GET /api/ios/apps?app_ids=:id` | [sensor-tower.md](integrations/sensor-tower.md) |
+| Release notes / What's New | iTunes Lookup `GET /lookup?id=:id` | [itunes-lookup.md](integrations/itunes-lookup.md) |
+| Screenshots (iPhone, iPad, icon) | Sensor Tower `GET /api/ios/apps?app_ids=:id` | [sensor-tower.md](integrations/sensor-tower.md) |
+| Competitor screenshots (batch) | Sensor Tower `GET /api/ios/apps?app_ids=id1,id2,id3` | [sensor-tower.md](integrations/sensor-tower.md) |
+| Downloads estimate (monthly) | Sensor Tower `humanized_worldwide_last_month_downloads` | [sensor-tower.md](integrations/sensor-tower.md) |
+| Revenue estimate (monthly) | Sensor Tower `humanized_worldwide_last_month_revenue` | [sensor-tower.md](integrations/sensor-tower.md) |
+| User reviews (most recent, by country) | Apple RSS `/{cc}/rss/customerreviews/id=:id/sortBy=mostRecent/json` | [apple-rss-reviews.md](integrations/apple-rss-reviews.md) |
+| App ratings (current + history) | Astro `get_app_ratings` | [astro.md](integrations/astro.md) |
+| App search | Astro `search_app_store` | [astro.md](integrations/astro.md) |
+| App tracking setup | Astro `add_app`, `list_apps` | [astro.md](integrations/astro.md) |
+| Track keywords (batch up to 100) | Astro `add_keywords` | [astro.md](integrations/astro.md) |
+| Keyword rankings (current) | Astro `search_rankings` | [astro.md](integrations/astro.md) |
+| Keyword rank trends (history + volatility + trend) | Astro `search_rankings` (`includeHistory`, `includeStatistics`) | [astro.md](integrations/astro.md) |
+| Keyword popularity & difficulty | Astro `add_keywords` / `search_rankings` response | [astro.md](integrations/astro.md) |
+| Keyword suggestions (AI) | Astro `get_keyword_suggestions` | [astro.md](integrations/astro.md) |
+| Competitor keyword extraction | Astro `extract_competitors_keywords` | [astro.md](integrations/astro.md) |
+| App's tracked keywords | Astro `get_app_keywords` | [astro.md](integrations/astro.md) |
+| Keyword tags & notes (organization) | Astro `manage_tag`, `set_keyword_tag`, `set_keyword_note` | [astro.md](integrations/astro.md) |
 
-> **Note:** ASC Connect endpoints return **exact first-party data** from App Store Connect (not estimates). Requires connected ASC account (Indie plan+).
+## Not Currently Covered
 
-### Skill → Tool Mapping
+These capabilities were part of the previous stack but have no drop-in replacement in the current one. Affected skills either degrade gracefully (run on general knowledge) or need a manual data source.
 
-Which skills use which Appeeky tools:
+| Missing capability | Impact |
+|--------------------|--------|
+| Country chart rankings (top-free/paid/grossing by country) | `market-movers`, `market-pulse`, `app-store-featured` |
+| Market movers (gainers/losers) | `market-movers`, `market-pulse`, `competitor-tracking` |
+| Trending keywords (live) | `market-pulse`, `seasonal-aso` |
+| Featured apps / editorial | `app-store-featured`, `market-pulse` |
+| New releases feed | `market-pulse` |
+| Downloads-to-top (rank → volume) | `market-movers`, `app-launch` |
+| First-party ASC data (exact downloads/revenue/subs) | `asc-metrics` — use the official [App Store Connect API](integrations/app-store-connect.md) directly |
+| In-app purchase list | `monetization-strategy`, `subscription-lifecycle` — IAP flag is available via iTunes Lookup, but not the full list |
+| Review sentiment analysis (pre-computed) | `review-management`, `retention-optimization` — compute from RSS reviews in-skill |
 
-| Skill | Primary Tools Used |
-|-------|-------------------|
-| `aso-audit` | `aso_full_audit`, `get_app`, `get_app_keywords`, `get_keyword_metrics` |
-| `keyword-research` | `get_keyword_suggestions`, `get_keyword_metrics`, `get_keyword_ranks`, `get_app_keywords` |
-| `metadata-optimization` | `aso_validate_metadata`, `aso_suggest_metadata`, `get_app` |
-| `competitor-analysis` | `aso_competitor_report`, `compare_keywords`, `get_app_intelligence` |
-| `screenshot-optimization` | `get_app` (screenshots), competitor screenshots endpoint |
-| `review-management` | `get_app_reviews`, `get_app` |
-| `localization` | `get_keyword_suggestions`, `get_keyword_metrics` (per country) |
-| `app-launch` | `search_apps`, `get_category_top`, `get_keyword_suggestions` |
-| `ua-campaign` | `get_keyword_metrics`, `get_app_intelligence` |
-| `app-store-featured` | `get_featured_apps`, `get_app` |
-| `retention-optimization` | `get_app_reviews`, `get_app_intelligence` |
-| `monetization-strategy` | `get_app_intelligence`, `get_app` |
-| `app-analytics` | `get_app_intelligence`, `get_country_rankings` |
-| `ab-test-store-listing` | `get_app` (screenshots), `get_app_intelligence` |
-| `app-marketing-context` | `get_app`, `get_app_keywords`, `search_apps` |
-| `market-movers` | `get_market_movers`, `get_market_activity`, `get_category_top`, `get_app` |
-| `market-pulse` | `get_market_movers`, `get_market_activity`, `get_trending_keywords`, `get_featured_apps`, `get_new_releases`, `get_new_number_1`, `get_downloads_to_top` |
-| `asc-metrics` | `GET /v1/connect/metrics`, `GET /v1/connect/metrics/apps/:appId` (REST only) |
-| `seasonal-aso` | `get_keyword_suggestions`, `get_keyword_metrics`, `get_trending_keywords` |
-| `in-app-events` | `get_keyword_suggestions`, `get_keyword_metrics`, `get_app` |
-| `android-aso` | `get_keyword_suggestions`, `get_keyword_metrics`, `get_app_reviews`, `get_app` |
-| `onboarding-optimization` | `get_app_intelligence`, `get_app_reviews` |
-| `rating-prompt-strategy` | `get_app`, `get_app_reviews` |
-| `app-icon-optimization` | `get_app` (screenshots, competitor screenshots) |
-| `subscription-lifecycle` | `get_app_intelligence`, `get_app_reviews` |
-| `app-clips` | `get_keyword_ranks`, `get_app` |
-| `apple-search-ads` | `get_keyword_metrics`, `get_keyword_suggestions`, `get_keyword_ranks` |
-| `press-and-pr` | `get_app`, `search_apps` |
-| `competitor-tracking` | `get_app`, `get_app_keywords`, `get_app_reviews`, `get_market_movers`, `get_market_activity` |
-| `crash-analytics` | `get_app`, `get_app_reviews` |
+## Skill → Tool Mapping
+
+| Skill | Tools Used |
+|-------|-----------|
+| `aso-audit` | Astro `search_rankings`, `get_app_keywords`, `get_app_ratings` · Sensor Tower (metadata) · iTunes Lookup (What's New) |
+| `keyword-research` | Astro `get_keyword_suggestions`, `search_rankings`, `add_keywords`, `extract_competitors_keywords` |
+| `metadata-optimization` | Sensor Tower (metadata) · iTunes Lookup · Astro `get_app_keywords` |
+| `competitor-analysis` | Astro `extract_competitors_keywords`, `search_rankings` · Sensor Tower (competitor batch: metadata, screenshots, downloads/revenue) |
+| `screenshot-optimization` | Sensor Tower (screenshots + competitor screenshots) |
+| `review-management` | Apple RSS reviews · Astro `get_app_ratings` (history) |
+| `localization` | Astro `get_keyword_suggestions`, `search_rankings` (per store) · Sensor Tower (per-country metadata) |
+| `app-launch` | Astro `search_app_store`, `get_keyword_suggestions` |
+| `ua-campaign` | Astro `search_rankings`, `get_keyword_suggestions` · Sensor Tower (revenue/downloads benchmarks) |
+| `apple-search-ads` | Astro `search_rankings`, `get_keyword_suggestions`, `add_keywords` |
+| `app-store-featured` | Sensor Tower (metadata) — market/featured data **not covered** (degraded) |
+| `retention-optimization` | Apple RSS reviews · Sensor Tower (downloads trend) |
+| `monetization-strategy` | Sensor Tower (revenue/downloads) · Apple RSS reviews · iTunes Lookup (IAP flag) |
+| `app-analytics` | Sensor Tower (downloads/revenue) · Astro `search_rankings` |
+| `ab-test-store-listing` | Sensor Tower (screenshots, metadata) · Astro `get_app_ratings` |
+| `app-marketing-context` | Sensor Tower (metadata) · Astro `get_app_keywords`, `search_app_store` |
+| `market-movers` | **Not covered** — relies on general knowledge + Astro `search_app_store` |
+| `market-pulse` | **Not covered** — relies on general knowledge + Astro `search_app_store` |
+| `asc-metrics` | Official [App Store Connect API](integrations/app-store-connect.md) (JWT auth) |
+| `seasonal-aso` | Astro `get_keyword_suggestions`, `search_rankings` |
+| `in-app-events` | Astro `get_keyword_suggestions`, `search_rankings` · Sensor Tower (metadata) |
+| `android-aso` | Apple RSS reviews (cross-ref only) · general knowledge (Play Store has no public API equivalent) |
+| `onboarding-optimization` | Apple RSS reviews · Sensor Tower (downloads) |
+| `rating-prompt-strategy` | Astro `get_app_ratings` (history) · Apple RSS reviews |
+| `app-icon-optimization` | Sensor Tower (icon + competitor icons) |
+| `subscription-lifecycle` | Sensor Tower (revenue) · Apple RSS reviews |
+| `app-clips` | Astro `search_rankings` · Sensor Tower (metadata) |
+| `competitor-tracking` | Astro `search_rankings`, `get_app_keywords`, `get_app_ratings` · Sensor Tower (metadata, downloads, revenue) · Apple RSS reviews |
+| `crash-analytics` | Apple RSS reviews · Astro `get_app_ratings` |
+| `press-and-pr` | Sensor Tower (metadata) · Astro `search_app_store` |
 
 ## Other Useful Tools
 
 | Tool | Purpose | Integration |
 |------|---------|-------------|
-| **App Store Connect** | Official Apple analytics, releases, IAP management | [app-store-connect.md](integrations/app-store-connect.md) |
-| **Appeeky Connect** | Exact ASC sales/revenue data synced into Appeeky | [appeeky-connect.md](integrations/appeeky-connect.md) |
+| **App Store Connect** | Official Apple analytics, releases, IAP management, first-party sales data | [app-store-connect.md](integrations/app-store-connect.md) |
 | **RevenueCat** | Subscription analytics, paywall A/B testing | [revenuecat.md](integrations/revenuecat.md) |
 | **Firebase** | In-app analytics, crash reporting, A/B testing | [firebase.md](integrations/firebase.md) |

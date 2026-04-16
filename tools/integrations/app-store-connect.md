@@ -70,36 +70,99 @@ Each gets a unique URL for targeted campaigns.
 
 ## API Access
 
-For automated workflows, use the App Store Connect API:
+For automated workflows, use the App Store Connect API. All requests need a JWT built from a `.p8` key, your Issuer ID, and the Key ID.
+
+### Setup
+
+1. App Store Connect → Users and Access → Integrations → **App Store Connect API**
+2. Generate a new key with the **Sales and Finance** role (needed for sales/finance reports) — download the `.p8` file (only once)
+3. Note the **Issuer ID** and **Key ID**
+4. Generate a JWT (ES256, 20-min expiry max). Many SDKs do this: [app-store-connect-jwt helpers](https://developer.apple.com/documentation/appstoreconnectapi/generating-tokens-for-api-requests)
+
+### Core endpoints
 
 ```bash
-# Generate API key in App Store Connect → Users and Access → Keys
-# Create JWT token from the key
-
-curl -H "Authorization: Bearer $JWT_TOKEN" \
+# App list (find your id + bundleId)
+curl -H "Authorization: Bearer $JWT" \
   "https://api.appstoreconnect.apple.com/v1/apps"
+
+# Customer reviews (read)
+curl -H "Authorization: Bearer $JWT" \
+  "https://api.appstoreconnect.apple.com/v1/apps/$APP_ID/customerReviews"
+
+# Review responses (reply)
+POST /v1/customerReviewResponses
+
+# Version management
+GET /v1/apps/{id}/appStoreVersions
+
+# Country availability
+GET /v1/apps/{id}/appAvailabilities
 ```
 
-**Useful API endpoints:**
-- `/v1/apps/{id}/appStoreVersions` — Version management
-- `/v1/apps/{id}/customerReviews` — Read reviews
-- `/v1/apps/{id}/customerReviewResponses` — Respond to reviews
-- `/v1/apps/{id}/appAvailabilities` — Country availability
+### Sales & Trends (downloads, proceeds, IAP, subs — first-party)
 
-## When to Use App Store Connect vs Appeeky
+Returns a gzipped TSV per report. Parse and aggregate in-skill.
 
-| Need | App Store Connect | Appeeky Connect | Appeeky |
-|------|------------------|----------------|---------|
-| Your app's exact download numbers | ✓ (official) | ✓ (synced daily) | Estimates |
-| Your app's exact revenue | ✓ (official) | ✓ (synced daily) | Estimates |
-| IAP counts, trials, subscriptions | ✓ (official) | ✓ (synced daily) | ✗ |
-| Country breakdown (exact) | ✓ | ✓ (synced daily) | ✗ |
-| Competitor data | ✗ | ✗ | ✓ |
-| Keyword rankings | ✗ | ✗ | ✓ |
-| Keyword volume/difficulty | ✗ | ✗ | ✓ |
+```bash
+# Daily sales summary
+GET /v1/salesReports
+  ?filter[frequency]=DAILY
+  &filter[reportType]=SALES
+  &filter[reportSubType]=SUMMARY
+  &filter[vendorNumber]=<vendor id>
+  &filter[reportDate]=YYYY-MM-DD
+
+# Daily subscription summary
+GET /v1/salesReports
+  ?filter[frequency]=DAILY
+  &filter[reportType]=SUBSCRIPTION
+  &filter[reportSubType]=SUMMARY
+  &filter[version]=1_4
+  &filter[vendorNumber]=<vendor id>
+  &filter[reportDate]=YYYY-MM-DD
+
+# Subscription events (trials, conversions, cancellations)
+GET /v1/salesReports
+  ?filter[frequency]=DAILY
+  &filter[reportType]=SUBSCRIPTION_EVENT
+  &filter[reportSubType]=SUMMARY
+  &filter[version]=1_3
+  &filter[vendorNumber]=<vendor id>
+  &filter[reportDate]=YYYY-MM-DD
+```
+
+### Finance Reports (actual paid proceeds per region, monthly)
+
+```bash
+GET /v1/financeReports
+  ?filter[regionCode]=Z1
+  &filter[reportType]=FINANCIAL
+  &filter[vendorNumber]=<vendor id>
+  &filter[reportDate]=YYYY-MM
+```
+
+`Z1` = all regions. Use a specific region code (e.g. `US`, `FR`, `JP`) for per-country finance data.
+
+### Retention
+
+- Daily Sales reports — rolling 365 days
+- Weekly / Monthly / Yearly Sales reports — longer retention
+- Finance reports — available ~5 weeks after month-end
+
+## When to Use App Store Connect vs Third-Party
+
+| Need | App Store Connect | Astro | Sensor Tower (public) |
+|------|------------------|-------|-----------------------|
+| Your app's exact download numbers | ✓ (official) | ✗ | Estimate only |
+| Your app's exact revenue | ✓ (official) | ✗ | Estimate only |
+| IAP counts, trials, subscriptions | ✓ (official) | ✗ | ✗ (flag only) |
+| Country breakdown (exact) | ✓ | ✗ | ✗ |
+| Competitor metadata + estimates | ✗ | Partial | ✓ |
+| Keyword rankings | ✗ | ✓ | ✗ |
+| Keyword volume/difficulty | ✗ | ✓ | ✗ |
 | A/B test setup | ✓ (native) | ✗ | ✗ |
-| Review management | ✓ (respond) | ✗ | ✓ (analyze) |
-| ASO audit | ✗ | ✗ | ✓ |
-| Market intelligence | Limited | ✗ | ✓ |
+| Review management (respond) | ✓ | ✗ | ✗ |
+| Review text (read) | ✓ | ✗ | ✗ (use Apple RSS) |
 
-**Appeeky Connect** = connect your ASC API key once in [appeeky.com → Settings → Integrations](https://appeeky.com). Data syncs nightly and is then accessible via the Appeeky API without repeated ASC auth. See [appeeky-connect.md](appeeky-connect.md) and the `asc-metrics` skill.
+For first-party sales/revenue/subscription analysis, see the `asc-metrics` skill — it parses the Sales & Finance reports above directly.

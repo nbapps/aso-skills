@@ -39,13 +39,15 @@ You help the user identify and act on seasonal keyword opportunities and listing
 
 ### Step 2 — Research Seasonal Keywords
 
-Use Appeeky to find volume on seasonal terms:
+Use the Astro MCP to find volume and difficulty on seasonal terms:
 
-```bash
-GET /v1/keywords/metrics?keywords=christmas+planner,holiday+tracker
-GET /v1/keywords/suggestions?term=christmas&country=us
-GET /v1/keywords/trending?country=us&days=7
 ```
+astro.add_keywords(store: "us", keywords: ["christmas planner","holiday tracker"], appId: "...")
+astro.search_rankings(store: "us", keyword: "christmas planner", includeHistory: true, period: "year", includeStatistics: true)
+astro.get_keyword_suggestions(store: "us", appId: "...")
+```
+
+> Astro returns current popularity + difficulty on `add_keywords`. Trending keyword feeds are not covered — infer seasonality by running `search_rankings` with `includeHistory` and looking for YoY spikes on the same window.
 
 **Filter by:**
 - Volume spike (compare to baseline 30 days prior)
